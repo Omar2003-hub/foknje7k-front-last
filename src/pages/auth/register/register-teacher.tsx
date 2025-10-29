@@ -178,14 +178,14 @@ const RegisterTeacher = () => {
 
   return (
     <AuthLayout
-      title1={"Bienvenue à Fok Nje7ik"}
+      title1={"Bienvenue à Fok Nje7ek"}
       title2={"s'inscrire en tant"}
       title3={"professeur"}
     >
       <form className={"form-container w-full"}>
         <CustomInput
-          label={"Nom Complet"}
-          placeholder={"Votre Nom"}
+          label={"Nom et Prénom"}
+          placeholder={"Foulen Ben Foulen"}
           inputType={"text"}
           iconPrefix={<PersonOutlineOutlinedIcon className="text-title" />}
           CustomStyle={"mb-5"}

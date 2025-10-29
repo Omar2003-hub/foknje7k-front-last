@@ -103,7 +103,7 @@ const Newsletter = () => {
               <p>
                 Profitez de votre temps libre pour apprendre de nouvelles
                 compétences. Plus de 900 étudiants apprennent quotidiennement avec
-                FOK NJE7IK. Abonnez-vous pour découvrir nos nouveaux cours.
+                FOK NJE7EK. Abonnez-vous pour découvrir nos nouveaux cours.
               </p>
             </div>
           </div>

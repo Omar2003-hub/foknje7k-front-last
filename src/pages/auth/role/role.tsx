@@ -32,13 +32,20 @@ const Role = () => {
             />
           </div>
           <button
-            className="role-button teacher"
+            className="role-button"
             onClick={() => navigate("/register")}
           >
             Espace professeur
           </button>
         </div>
       </div>
+      <button
+        className="role-button"
+        style={{ display: "block", margin: "2rem auto 0 auto" }}
+        onClick={() => navigate("/login")}
+      >
+        Retour à la page de connexion
+      </button>
     </div>
   );
 };

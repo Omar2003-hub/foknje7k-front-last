@@ -27,7 +27,7 @@ const Footer = () => {
                 className="w-20 h-28 lg:w-20 lg:h-20 object-cover rounded-xl  "
               />
               <div>
-                <h2 className="text-xl font-bold mt-2 sm:mt-0">FOK NJE7IK</h2>
+                <h2 className="text-xl font-bold mt-2 sm:mt-0">FOK NJE7EK</h2>
                 <p className="text-sm opacity-80">Apprendre, grandir, réussir</p>
               </div>
             </div>
@@ -130,7 +130,7 @@ const Footer = () => {
 
         <div className="mt-3 pt-3 border-t border/20 flex flex-col justify-center items-center gap-4 text-center">
           <p className="text-sm opacity-80">
-            <span className="fa">©</span> 2025 FOK NJE7IK. Tous droits réservés.
+            <span className="fa">©</span> 2025 FOK NJE7EK. Tous droits réservés.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <p className="text-sm opacity-80">Conditions d'utilisation</p>
