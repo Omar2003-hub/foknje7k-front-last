@@ -8,7 +8,7 @@ import Newsletter from "./home-content/newsletter";
 
 const Landing = () => {
   return (
-    <div className="bg-blue-200">
+    <div className="bg-blue-200 w-full overflow-x-hidden">
       <Welcome />
       <Service />
       <Classes />

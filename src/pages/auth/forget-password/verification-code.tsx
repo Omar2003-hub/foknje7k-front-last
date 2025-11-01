@@ -68,7 +68,7 @@ const VerificationCode = () => {
   return (
     <AuthLayout
       title1={"Bienvenue à"}
-      title2={"Fok Nje7ik"}
+      title2={"Fok Nje7ek"}
       title3={"Plateforme d'apprentissage"}
     >
       <h1 className="text-3xl font-montserrat_bold text-title mb-3">

@@ -34,7 +34,7 @@ import MailOutlineOutlinedIcon from "@mui/icons-material/MailOutlineOutlined";
 import { SnackbarContext } from "../../../config/hooks/use-toast";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import CreditCardIcon from "@mui/icons-material/CreditCard";
+// import CreditCardIcon from "@mui/icons-material/CreditCard"; // Not used - online payment disabled
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
 const OfferStudent = () => {
@@ -57,7 +57,7 @@ const OfferStudent = () => {
   const [selectedSubjects, setSelectedSubjects] = useState<number[]>([]);
   const [availableSubjects, setAvailableSubjects] = useState<any[]>([]);
   const [paymentFile, setPaymentFile] = useState<File | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'online' | 'upload'>('online');
+  const [paymentMethod, setPaymentMethod] = useState<'online' | 'upload'>('upload'); // Default to upload only
   
   const snackbarContext = useContext(SnackbarContext);
 
@@ -146,7 +146,7 @@ const OfferStudent = () => {
           setIsSubjectModalOpen(true);
           setSelectedSubjects([]); 
           setPaymentFile(null);
-          setPaymentMethod('online'); // Reset to default payment method
+          setPaymentMethod('upload'); // Reset to upload method only
         }
       })
       .catch((e) => {
@@ -158,7 +158,7 @@ const OfferStudent = () => {
           setIsSubjectModalOpen(true);
           setSelectedSubjects([]); 
           setPaymentFile(null);
-          setPaymentMethod('online'); // Reset to default payment method
+          setPaymentMethod('upload'); // Reset to upload method only
         }
       });
   };
@@ -220,11 +220,12 @@ const OfferStudent = () => {
     // Send subject IDs as query parameter
     const subjectIdsParam = selectedSubjects.join(',');
 
-    if (paymentMethod === 'online') {
-      // Handle online payment
-      console.log('[PAYMENT] Using ONLINE payment endpoint.');
-      handleOnlinePayment(subjectIdsParam, totalPrice);
-    } else {
+    // Online payment method disabled - only upload available
+    // if (paymentMethod === 'online') {
+    //   // Handle online payment
+    //   console.log('[PAYMENT] Using ONLINE payment endpoint.');
+    //   handleOnlinePayment(subjectIdsParam, totalPrice);
+    // } else {
       // Handle upload payment
       console.log('[PAYMENT] Using MANUAL payment endpoint.');
       sendOfferService(selectedOffer.id, formData, subjectIdsParam)
@@ -235,7 +236,7 @@ const OfferStudent = () => {
           setAvailableSubjects([]);
           setPaymentFile(null);
           setSelectedOffer(null);
-          setPaymentMethod('online');
+          setPaymentMethod('upload');
           
           if (snackbarContext) {
             snackbarContext.showMessage(
@@ -255,10 +256,11 @@ const OfferStudent = () => {
             );
           }
         });
-    }
+    // } // Closing the commented online payment condition
   };
 
-  const handleOnlinePayment = async (subjectIdsParam: string, totalPrice: number) => {
+  // COMMENTED OUT: Online payment method disabled
+  /* const handleOnlinePayment = async (subjectIdsParam: string, totalPrice: number) => {
     if (snackbarContext) {
       snackbarContext.showMessage(
         "Info",
@@ -295,7 +297,7 @@ const OfferStudent = () => {
         );
       }
     }
-  };
+  }; */
 
   const handleCloseSubjectModal = () => {
     setIsSubjectModalOpen(false);
@@ -397,52 +399,35 @@ const OfferStudent = () => {
             
             {/* Payment Method Selection */}
             <div className="mb-6">
+              {/* Payment method selection disabled - only upload available */}
               <Typography className="mb-3 font-montserrat_medium">
-                Choisissez votre méthode de paiement:
+                Méthode de paiement: Téléverser un reçu
               </Typography>
-              <ToggleButtonGroup
-                value={paymentMethod}
-                exclusive
-                onChange={(event, newMethod) => {
-                  if (newMethod !== null) {
-                    setPaymentMethod(newMethod);
-                  }
+              {/* <ToggleButtonGroup commented out - online payment disabled
+              <ToggleButton 
+                value="online" 
+                className="flex-1 py-3"
+                sx={{
+                  '&.Mui-selected': {
+                    backgroundColor: '#1976d2',
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: '#1565c0',
+                    },
+                  },
                 }}
-                className="w-full"
               >
-                <ToggleButton 
-                  value="online" 
-                  className="flex-1 py-3"
-                  sx={{
-                    '&.Mui-selected': {
-                      backgroundColor: '#1976d2',
-                      color: 'white',
-                      '&:hover': {
-                        backgroundColor: '#1565c0',
-                      },
-                    },
-                  }}
-                >
-                  <CreditCardIcon className="mr-2" />
-                  Paiement en ligne
-                </ToggleButton>
-                <ToggleButton 
-                  value="upload" 
-                  className="flex-1 py-3"
-                  sx={{
-                    '&.Mui-selected': {
-                      backgroundColor: '#1976d2',
-                      color: 'white',
-                      '&:hover': {
-                        backgroundColor: '#1565c0',
-                      },
-                    },
-                  }}
-                >
-                  <CloudUploadIcon className="mr-2" />
-                  Téléverser un reçu
-                </ToggleButton>
-              </ToggleButtonGroup>
+                <CreditCardIcon className="mr-2" />
+                Paiement en ligne
+              </ToggleButton> */}
+              {/* <div className="w-full p-3 mb-4 border-2 border-blue-200 rounded-lg bg-blue-50">
+                <div className="flex items-center">
+                  <CloudUploadIcon className="mr-2 text-blue-600" />
+                  <Typography className="text-blue-800 font-montserrat_medium">
+                    Téléverser un reçu de paiement
+                  </Typography>
+                </div>
+              </div> */}
             </div>
             
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -476,24 +461,10 @@ const OfferStudent = () => {
               </div>
               
               <div>
-                {paymentMethod === 'online' ? (
-                  <div className="p-4 border-2 border-blue-200 rounded-lg bg-blue-50">
-                    <div className="flex items-center mb-2">
-                      <CreditCardIcon className="mr-2 text-blue-600" />
-                      <Typography className="text-blue-800 font-montserrat_medium">
-                        Paiement en ligne sécurisé
-                      </Typography>
-                    </div>
-                    <Typography className="text-sm text-blue-600">
-                      Vous serez redirigé vers notre plateforme de paiement sécurisée.
-                      Cartes acceptées: Visa, Mastercard, etc.
-                    </Typography>
-                  </div>
-                ) : (
-                  <>
-                    <label className="block mb-2 font-montserrat_medium">
-                      Téléverser le reçu de paiement
-                    </label>
+                {/* Online payment method disabled - only upload available */}
+                <label className="block mb-2 font-montserrat_medium">
+                  Téléverser le reçu de paiement
+                </label>
                     <div 
                       className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
                       onClick={() => document.getElementById('payment-file-input')?.click()}
@@ -520,8 +491,6 @@ const OfferStudent = () => {
                         Fichier sélectionné: {paymentFile.name}
                       </p>
                     )}
-                  </>
-                )}
               </div>
             </div>
           </div>

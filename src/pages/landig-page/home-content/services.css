@@ -1,3 +1,10 @@
+.services-container {
+  width: 100%;
+  overflow-x: hidden;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
 .cours-details {
   display: flex;
   align-items: center;
@@ -47,6 +54,8 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+  width: 100%;
+  overflow: hidden;
 }
 
 .ImageContainer img {
@@ -60,7 +69,7 @@
   background-color: white;
   display: flex;
   justify-content: center;
-  width: 820px;
+  width: min(820px, 95vw);
   height: 560px;
   margin-right: 5px;
   border-radius: 40px;

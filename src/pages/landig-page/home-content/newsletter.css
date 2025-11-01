@@ -7,17 +7,22 @@
   padding: 40px 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #333;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .newsletter-content {
   display: flex;
   flex-wrap: wrap;
   gap: 60px;
-  max-width: 1400px;
+  max-width: min(1400px, 95vw);
   margin: 0 auto;
   justify-content: center;
   align-items: flex-start;
-  padding: 40px;
+  padding: 40px 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .newsletter-left, .newsletter-right {

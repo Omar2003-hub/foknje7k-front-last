@@ -10,6 +10,8 @@
   min-height: 100vh;
   width: 100%;
   position: relative;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .hero-section::before {
@@ -27,12 +29,14 @@
   display: flex;
   align-items: center;
   gap: 60px;
-  max-width: 1300px;
+  max-width: min(1300px, 95vw);
   margin: auto;
   flex-wrap: wrap;
   position: relative;
   z-index: 1;
   justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .image-container {
@@ -220,13 +224,13 @@
   }
   
   .green-circle {
-    width: 280px;
-    height: 280px;
+    width: min(280px, 90vw);
+    height: min(280px, 90vw);
   }
   
   .image-wrapper {
-    width: 240px;
-    height: 240px;
+    width: min(240px, 80vw);
+    height: min(240px, 80vw);
     border-width: 4px;
   }
   

@@ -115,6 +115,7 @@ const Login = () => {
         if(e.response.data.errors[0] === "Le compte utilisateur est désactivé") {
           if(snackbarContext) {
             snackbarContext.showMessage("Erreur", "Verifier votre email pour activer votre compte", "error");
+            navigation("/login");
           }
         }
         if(e.response.data.errors[0] === "Bad credentials") {
@@ -132,7 +133,7 @@ const Login = () => {
   return (
     <AuthLayout
       title1={"Bienvenue à"}
-      title2={"Fok Nje7ik"}
+      title2={"Fok Nje7ek"}
       title3={"Plateforme d'apprentissage"}
     >
       <form className="w-full" >
