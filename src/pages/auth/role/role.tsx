@@ -42,9 +42,9 @@ const Role = () => {
       <button
         className="role-button"
         style={{ display: "block", margin: "2rem auto 0 auto" }}
-        onClick={() => navigate("/login")}
+        onClick={() => navigate("/")}
       >
-        Retour à la page de connexion
+        Retour à la page d'accueil
       </button>
     </div>
   );

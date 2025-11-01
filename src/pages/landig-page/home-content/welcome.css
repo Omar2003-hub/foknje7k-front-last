@@ -15,7 +15,9 @@ body {
   min-height: 85vh;
   overflow: hidden;
   color: white;
-  margin-top: 100px; 
+  margin-top: 100px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .welcome-content {
@@ -107,7 +109,7 @@ body {
   width: 220px;
   height: 220px;
   top: 20px;
-  right: 10%;
+  right: min(10%, 20px);
   z-index: 3;
 }
 
@@ -115,7 +117,7 @@ body {
   width: 200px;
   height: 200px;
   bottom: 20px;
-  left: 10%;
+  left: min(10%, 20px);
   z-index: 2;
 }
 

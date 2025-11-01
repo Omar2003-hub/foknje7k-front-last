@@ -15,7 +15,7 @@ import Carousel from "react-material-ui-carousel";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import AddIcon from "@mui/icons-material/Add";
-import CreditCardIcon from "@mui/icons-material/CreditCard";
+// import CreditCardIcon from "@mui/icons-material/CreditCard"; // Not used - online payment disabled
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import OfferCard from "../../../componet/offer-card";
 import FormModal from "../../../componet/offerModal";
@@ -46,7 +46,7 @@ const Offer = () => {
   const [selectedOffer, setSelectedOffer] = useState<any>(null);
   const [isConfirmModal, setIsConfirmModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'online' | 'upload'>('online');
+  const [paymentMethod, setPaymentMethod] = useState<'online' | 'upload'>('upload'); // Default to upload only
   const fetchData = () => {
     getAllTeacherOfferService()
       .then((res) => {
@@ -105,7 +105,7 @@ const Offer = () => {
       // For paid offers, show payment modal
       setIsConfirmModal(true);
       setSelectedFile(null);
-      setPaymentMethod('online'); // Reset to default payment method
+      setPaymentMethod('upload'); // Reset to upload method only
     }
   };
 
@@ -113,10 +113,11 @@ const Offer = () => {
     setIsConfirmModal(false);
     setSelectedOffer(null);
     setSelectedFile(null);
-    setPaymentMethod('online');
+    setPaymentMethod('upload');
   };
 
-  const handleOnlinePayment = async () => {
+  // COMMENTED OUT: Online payment method disabled
+  /* const handleOnlinePayment = async () => {
     if (snackbarContext) {
       snackbarContext.showMessage(
         "Info",
@@ -152,7 +153,7 @@ const Offer = () => {
         );
       }
     }
-  };
+  }; */
 
   const groupedSrcList: any[] = data.reduce(
     (result: any, src: any, index: number) => {
@@ -206,10 +207,11 @@ const Offer = () => {
       return;
     }
 
-    // For paid offers, check payment method
-    if (paymentMethod === 'online') {
-      handleOnlinePayment();
-    } else {
+    // For paid offers, only upload payment method is available
+    // Online payment method has been disabled
+    // if (paymentMethod === 'online') {
+    //   handleOnlinePayment();
+    // } else {
       // Handle upload payment
       if (!selectedFile) {
         if (snackbarContext) {
@@ -248,7 +250,7 @@ const Offer = () => {
             );
           }
         });
-    }
+    // }  // Closing the commented online payment condition
   };
   return (
     <div
@@ -296,7 +298,7 @@ const Offer = () => {
                 Confirmer le Paiement
               </h1>
               
-              {/* Payment Method Selection */}
+              {/* Payment Method Selection - COMMENTED OUT: Only upload method available now 
               <div className="w-full mb-6">
                 <Typography className="mb-3 text-center font-montserrat_medium">
                   Choisissez votre méthode de paiement:
@@ -311,22 +313,6 @@ const Offer = () => {
                   }}
                   className="w-full"
                 >
-                  <ToggleButton 
-                    value="online" 
-                    className="flex-1 py-3"
-                    sx={{
-                      '&.Mui-selected': {
-                        backgroundColor: '#1976d2',
-                        color: 'white',
-                        '&:hover': {
-                          backgroundColor: '#1565c0',
-                        },
-                      },
-                    }}
-                  >
-                    <CreditCardIcon className="mr-2" />
-                    Paiement en ligne
-                  </ToggleButton>
                   <ToggleButton 
                     value="upload" 
                     className="flex-1 py-3"
@@ -345,25 +331,12 @@ const Offer = () => {
                   </ToggleButton>
                 </ToggleButtonGroup>
               </div>
+              */}
 
-              {paymentMethod === 'online' ? (
-                <div className="w-full p-4 mb-5 border-2 border-blue-200 rounded-lg bg-blue-50">
-                  <div className="flex items-center mb-2">
-                    <CreditCardIcon className="mr-2 text-blue-600" />
-                    <Typography className="text-blue-800 font-montserrat_medium">
-                      Paiement en ligne sécurisé
-                    </Typography>
-                  </div>
-                  <Typography className="text-sm text-blue-600">
-                    Vous serez redirigé vers notre plateforme de paiement sécurisée.
-                    Cartes acceptées: Visa, Mastercard, etc.
-                  </Typography>
-                </div>
-              ) : (
-                <>
-                  <p className="mb-5 text-sm font-montserrat_regular text-text">
-                    Veuillez fournir une image claire du reçu de paiement
-                  </p>
+              {/* Online payment method disabled - only upload available */}
+              <p className="mb-5 text-sm font-montserrat_regular text-text">
+                Veuillez fournir une image claire du reçu de paiement
+              </p>
                   <Card
                     className="flex flex-col items-center justify-center w-full p-6 mb-5 border-2 border-dashed cursor-pointer border-primary"
                     onClick={handleCardClick}
@@ -380,8 +353,6 @@ const Offer = () => {
                       {selectedFile ? selectedFile.name : "Ajouter le reçu"}
                     </Typography>
                   </Card>
-                </>
-              )}
               
               <div className="flex flex-col justify-between w-full sm:flex-row">
                 <CustomButton
@@ -391,7 +362,7 @@ const Offer = () => {
                 />
                 <CustomButton
                   className="w-full h-10 text-white rounded-md bg-primary sm:w-1/3"
-                  text={paymentMethod === 'online' ? 'Payer en ligne' : 'Envoyer'}
+                  text={'Envoyer'}
                   onClick={handleConfirmPayment}
                 />
               </div>
