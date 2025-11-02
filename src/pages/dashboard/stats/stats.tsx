@@ -1,104 +1,98 @@
 import React, { useEffect, useState } from "react";
 import { BoxStat, MontantStat, TotalStat, UserStat } from "../../../assets/svg";
 import { getStatService } from "../../../services/playList-service";
+import "./stats.css";
 
-
-interface StatBoxProps {
+const MiniStat: React.FC<{
   title: string;
-  value: any;
+  value: React.ReactNode;
   icon?: string;
-}
-
-function StatBox(props: StatBoxProps) {
-  const { title, value, icon } = props;
-
+  colorClass?: string;
+}> = ({ title, value, icon, colorClass = "bg-gray-50" }) => {
   return (
-    <div
-      className="relative flex flex-col items-center justify-center p-6 text-gray-800 transition-transform duration-300 transform bg-white rounded-lg shadow-md hover:scale-105 hover:shadow-lg"
-    >
-      {icon && (
-        <div className="absolute p-2 bg-gray-100 rounded-full top-4 right-4">
-          <img src={icon} alt="icon" className="w-8 h-8" />
+    <div className={`mini-stat flex items-center justify-between p-3 rounded-lg bg-white border border-gray-100`}>
+      <div className="flex items-center gap-3">
+        <div className={`p-3 rounded-lg ${colorClass}`}>
+          {icon && <img src={icon} alt="icon" className="w-6 h-6" />}
         </div>
-      )}
-      <h3 className="mb-2 text-lg font-semibold text-center">{title}</h3>
-      <p className="text-3xl font-extrabold text-center">{value}</p>
+        <div>
+          <div className="text-sm text-gray-600">{title}</div>
+          <div className="text-xl font-bold text-gray-900">{value}</div>
+        </div>
+      </div>
+
     </div>
   );
-}
+};
 
-const Stats = () => {
-  const [data, setData] = useState<any>();
-
+const Stats: React.FC = () => {
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    getStatService().then((res) => {
-      console.log(res);
-      setData(res.data);
-    });
+    getStatService()
+      .then((res) => setData(res.data))
+      .catch(() => {});
   }, []);
 
   return (
-    <div className="flex flex-col justify-center w-full mb-10">
-      <h1 className="mb-10 text-3xl text-title font-montserrat_bold">
-        Statistiques
-      </h1>
-      <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        <StatBox
-          title="Total Utilisateurs"
-          value={data?.totalUsers}
-          icon={UserStat}
-        />
-        <StatBox
-          title="Ordres actifs"
-          value={data?.totalOrders}
-          icon={BoxStat}
-        />
-        <StatBox
-          title="Montant total"
-          value={`${data?.totalPrice} Dt`}
-          icon={MontantStat}
-        />
-        <StatBox
-          title="Total en attente"
-          value={data?.totalPendingOrders}
-          icon={TotalStat}
-        />
-        <StatBox
-          title="Total Élèves"
-          value={data?.totalStudents}
-          icon={UserStat}
-        />
-        <StatBox
-          title="Total Enseignants"
-          value={data?.totalTeachers}
-          icon={UserStat}
-        />
-        <StatBox
-          title="Total Super Enseignants"
-          value={data?.totalSuperTeachers}
-          icon={UserStat}
-        />
-        <StatBox
-          title="Élèves actifs"
-          value={data?.totalActiveStudents}
-          icon={UserStat}
-        />
-        <StatBox
-          title="Enseignants actifs"
-          value={data?.totalActiveTeachers}
-          icon={UserStat}
-        />
-        <StatBox
-          title="Élèves avec offre inscrite"
-          value={data?.totalStudentsWithEnrolledOffer}
-          icon={UserStat}
-        />
+    <div className="p-6">
+      <div className="mx-auto max-w-7xl">
+        <h1 className="mb-6 text-3xl font-bold text-gray-900">Statistiques</h1>
+
+        <div className="p-6 border border-gray-100 main-card bg-gray-50 rounded-2xl">
+          <div className="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-2">
+          {/* Left: Total Users large card */}
+          <div className="p-6 bg-white border border-gray-100 card rounded-2xl shadow-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm text-gray-500">Total Utilisateurs</div>
+                <div className="flex items-center gap-4 mt-4">
+                  <div className="text-5xl font-extrabold text-gray-900">{data?.totalUsers}</div>
+                </div>
+                <div className="mt-3 text-sm text-gray-500">Utilisateurs enregistrés sur la plateforme</div>
+              </div>
+              <div className="p-3 rounded-xl icon-users">
+                <img src={UserStat} alt="users" className="w-10 h-10" />
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Orders & Payments card with small grid */}
+          <div className="p-6 bg-white border border-gray-100 card rounded-2xl shadow-card">
+            <h3 className="mb-4 text-lg font-semibold text-gray-800">Commandes & Paiement</h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <MiniStat title="Commandes actives" value={data?.totalOrders} icon={BoxStat} colorClass="bg-orange-50" />
+              <MiniStat title="Commandes en attente" value={data?.totalPendingOrders} icon={TotalStat} colorClass="bg-yellow-50" />
+              <div className="sm:col-span-2">
+                <MiniStat title="Montant total" value={`${data?.totalPrice} DT`} icon={MontantStat} colorClass="bg-green-50" />
+              </div>
+            </div>
+          </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="p-6 bg-white border border-gray-100 card rounded-2xl shadow-card">
+            <h3 className="mb-4 text-lg font-semibold text-gray-800">Enseignants</h3>
+            <div className="grid grid-cols-1 gap-4">
+              <MiniStat title="Total Enseignants" value={data?.totalTeachers} icon={UserStat} colorClass="bg-blue-50" />
+              <MiniStat title="Enseignants actifs" value={data?.totalActiveTeachers} icon={UserStat} colorClass="bg-blue-50" />
+              <MiniStat title="Super Enseignants" value={data?.totalSuperTeachers} icon={UserStat} colorClass="bg-purple-50" />
+            </div>
+          </div>
+
+          <div className="p-6 bg-white border border-gray-100 card rounded-2xl shadow-card">
+            <h3 className="mb-4 text-lg font-semibold text-gray-800">Élèves</h3>
+            <div className="grid grid-cols-1 gap-4">
+              <MiniStat title="Total élèves" value={data?.totalStudents} icon={UserStat} colorClass="bg-yellow-50" />
+              <MiniStat title="Élèves actifs" value={data?.totalActiveStudents} icon={UserStat} colorClass="bg-yellow-50" />
+              <MiniStat title="Élèves avec offre" value={data?.totalStudentsWithEnrolledOffer} icon={UserStat} colorClass="bg-yellow-50" />
+            </div>
+          </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
 export default Stats;
-
-export {};
