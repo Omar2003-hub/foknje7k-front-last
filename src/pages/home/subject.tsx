@@ -145,6 +145,7 @@ const sidebarLinks = [
   { path: "/subscription", name: "Abonnement", roles: ["ROLE_SUPER_TEACHER", "ROLE_STUDENT"] },
   { path: "/management-prof", name: "Gestion Professeurs", roles: ["ROLE_ADMIN", "ROLE_SUPER_TEACHER"] },
   { path: "/management-student", name: "Gestion Étudiants", roles: ["ROLE_ADMIN", "ROLE_SUPER_TEACHER"] },
+  { path: "/management-users", name: "Gestion des utilisateurs", roles: ["ROLE_ADMIN"] },
   { path: "/files", name: "Fichiers", roles: ["ROLE_ADMIN", "ROLE_SUPER_TEACHER", "ROLE_TEACHER"] },
   { path: "/calender", name: "Calendrier Live", roles: ["ROLE_ADMIN", "ROLE_TEACHER", "ROLE_SUPER_TEACHER", "ROLE_STUDENT"] },
   { path: "/chat", name: "Chat Room", roles: ["ROLE_ADMIN", "ROLE_TEACHER", "ROLE_SUPER_TEACHER", "ROLE_STUDENT"] },
@@ -326,7 +327,7 @@ const Subject: React.FC = () => {
   return (
     <div className="flex h-full pt-24">
       {/* Sidebar - grand écran */}
-       <aside className=" h-screen hidden md:block">
+       <aside className="hidden h-screen md:block">
         <nav className="flex flex-col bg-[#f2f9f7] border-t border-b border-r border-[#09745f]"> 
           <div className="flex items-center justify-between p-4">
             <NavLink 

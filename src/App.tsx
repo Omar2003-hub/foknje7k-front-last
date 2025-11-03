@@ -1,6 +1,8 @@
+
 import React from "react";
 import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { useSelector } from "react-redux";
 import Login from "./pages/auth/login/login";
 import Register from "./pages/auth/register/register";
 import RegisterTeacher from "./pages/auth/register/register-teacher";
@@ -29,9 +31,28 @@ import StudentRequests from "./pages/dashboard/request/student-requests";
 import VerificationCode from "./pages/auth/forget-password/verification-code";
 import Stats from "./pages/dashboard/stats/stats";
 import ProfilePage from "./pages/dashboard/updateprofil/updateprofil";
+import ManagementUsers from "./pages/dashboard/management-users/management-users";
 import PaymentReturn from "./pages/api/payment/return";
 import PaymentCancel from "./pages/api/payment/cancel";
 import PaymentWebhook from "./pages/api/payment/webhook";
+
+// Simple NotFound page
+function NotFound() {
+  return (
+    <div style={{ padding: 40, textAlign: 'center', color: '#e11d48', fontWeight: 600 }}>
+      404 - Page non trouvée
+    </div>
+  );
+}
+
+// Simple admin route guard
+function RequireAdmin({ children }: { children: React.ReactNode }) {
+  const role = useSelector((state: any) => state?.user?.userData?.role?.name);
+  if (role !== "ROLE_ADMIN") {
+    return <NotFound />;
+  }
+  return <>{children}</>;
+}
 
 function App() {
   return (
@@ -59,6 +80,11 @@ function App() {
               <Route path="requests-prof" element={<Requests />} />
               <Route path="requests-student" element={<StudentRequests />} />
               <Route path="files" element={<Files />} />
+              <Route path="management-users" element={
+                <RequireAdmin>
+                  <ManagementUsers />
+                </RequireAdmin>
+              } />
               <Route path="stats" element={<Stats />} />
               <Route path="updateprofil" element={<ProfilePage />} />
 

@@ -16,10 +16,10 @@ const AuthLayout: React.FC<AuthLayoutComponentProps> = ({
   children,
 }) => {
   return (
-    <div className="auth-container flex flex-col lg:flex-row items-center justify-center w-full lg:h-screen px-4  lg:px-28">
+    <div className="flex flex-col items-center justify-center w-full px-4 auth-container lg:flex-row lg:h-screen lg:px-28">
       {/* Left Section */}
-      <div className="leftttt bg-green-800 text-white flex flex-col px-8 py-12 w-full lg:w-1/2 min-h-screen">
-        <img src={Logo} alt="Mascotte" className="w-40 h-40 mb-4" />
+      <div className="flex flex-col w-full min-h-screen px-8 py-12 text-white bg-green-800 leftttt lg:w-1/2">
+        <img src={Logo} alt="Mascotte" className="w-40 mb-4 h-60" />
 
         <h1 className="first-tag left-heading-title">
           {title1} <br />
@@ -30,12 +30,12 @@ const AuthLayout: React.FC<AuthLayoutComponentProps> = ({
         <img
           src={Elearning}
           alt="Illustration"
-          className="mt-8 w-60 h-60 object-cover rounded-full border-4 border-white self-center"
+          className="self-center object-cover mt-8 border-4 border-white rounded-full w-60 h-60"
         />
       </div>
 
       {/* Right Section */}
-      <div className="right-auth w-full lg:w-1/2 flex flex-col justify-start items-center px-4 lg:px-28 mt-8 lg:mt-0">
+      <div className="flex flex-col items-center justify-start w-full px-4 mt-8 right-auth lg:w-1/2 lg:px-28 lg:mt-0">
         {children}
       </div>
     </div>

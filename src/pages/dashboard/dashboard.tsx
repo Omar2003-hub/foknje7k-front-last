@@ -121,6 +121,7 @@ const sidebarLinks = [
   { path: "/subscription", name: "Abonnement", roles: ["ROLE_SUPER_TEACHER", "ROLE_STUDENT"] },
   { path: "/management-prof", name: "Gestion Professeurs", roles: ["ROLE_ADMIN", "ROLE_SUPER_TEACHER"] },
   { path: "/management-student", name: "Gestion Étudiants", roles: ["ROLE_ADMIN", "ROLE_SUPER_TEACHER"] },
+  { path: "/management-users", name: "Gestion des utilisateurs", roles: ["ROLE_ADMIN"] },
   { path: "/files", name: "Fichiers", roles: ["ROLE_ADMIN", "ROLE_SUPER_TEACHER", "ROLE_TEACHER"] },
   { path: "/calender", name: "Calendrier Live", roles: ["ROLE_ADMIN", "ROLE_TEACHER", "ROLE_SUPER_TEACHER", "ROLE_STUDENT"] },
   { path: "/chat", name: "Chat Room", roles: ["ROLE_ADMIN", "ROLE_TEACHER", "ROLE_SUPER_TEACHER", "ROLE_STUDENT"] },
@@ -163,7 +164,7 @@ function Breadcrumb() {
     );
 
   return (
-    <div className="w-full flex items-center space-x-2 text-sm font-montserrat_medium text-title">
+    <div className="flex items-center w-full space-x-2 text-sm font-montserrat_medium text-title">
       {/* Lien Accueil */}
       <NavLink to="/" className="flex items-center gap-1 hover:text-[#09745f] transition-colors">
         <FontAwesomeIcon
@@ -220,9 +221,9 @@ const Dashboard = () => {
   return (
     <div className="flex h-full pt-24">
       {/* Sidebar - grand écran */}
-      <aside className=" h-screen hidden md:block">
+      <aside className="hidden h-screen md:block">
         <nav className="flex flex-col bg-[#f2f9f7] border-t border-b border-r border-[#09745f]"> 
-          <div className="p-4 flex justify-between items-center">
+          <div className="flex items-center justify-between p-4">
       {/* Début de la modification - Rendre le titre cliquable */}
       <NavLink 
         to="/home"
@@ -288,7 +289,7 @@ const Dashboard = () => {
       </aside>
 
       {/* Toggle sidebar bouton mobile */}
-      <div className="md:hidden absolute right-3 top-20">
+      <div className="absolute md:hidden right-3 top-20">
         <IconButton onClick={toggleSidebar}>
           <MenuOpenIcon />
         </IconButton>
@@ -302,8 +303,8 @@ const Dashboard = () => {
         className="sm:hidden"
         transitionDuration={{ enter: 500, exit: 500 }}
       >
-        <aside className="w-64 bg-white shadow-md p-4 h-full">
-          <h2 className="text-lg font-bold mb-4">Tableau de Bord</h2>
+        <aside className="w-64 h-full p-4 bg-white shadow-md">
+          <h2 className="mb-4 text-lg font-bold">Tableau de Bord</h2>
           <nav>
             <ul>
               {sidebarLinks.map(
@@ -345,8 +346,8 @@ const Dashboard = () => {
           <Breadcrumb />
         </div>
 
-        <div className="px-5 lg:px-10 pt-4 h-full">
-          <div className=" rounded-lg shadow-sm p-4 h-full">
+        <div className="h-full px-5 pt-4 lg:px-10">
+          <div className="h-full p-4 rounded-lg shadow-sm ">
             <Outlet />
           </div>
         </div>
