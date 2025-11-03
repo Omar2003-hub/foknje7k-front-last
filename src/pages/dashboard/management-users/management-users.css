@@ -1,7 +1,29 @@
 /* Modern Management Users Styles */
 
+/* Force mobile-first approach */
 .management-users-container {
   animation: fadeInUp 0.6s ease-out;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure responsive base styles */
+.stats-grid {
+  display: grid;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.search-controls {
+  display: flex;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.table-container {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @keyframes fadeInUp {
@@ -138,7 +160,67 @@
 }
 
 /* Responsive Design Improvements */
-@media (max-width: 768px) {
+
+/* Large screens (1200px+) */
+@media (min-width: 1200px) {
+  .management-users-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .search-controls {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+}
+
+/* Medium-large screens (992px to 1199px) - Laptops */
+@media (min-width: 992px) and (max-width: 1199px) {
+  .management-users-container {
+    padding: 1.5rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+  
+  .search-controls {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  
+  .search-controls > div:first-child {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .table-container th,
+  .table-container td {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .table-container {
+    font-size: 0.9rem;
+  }
+  
+  .floating-btn {
+    transform: scale(0.95);
+  }
+}
+
+/* Medium screens (768px to 991px) - Small laptops and tablets */
+@media (min-width: 768px) and (max-width: 991px) {
+  .management-users-container {
+    padding: 1rem;
+  }
+  
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
@@ -149,12 +231,111 @@
     gap: 1rem;
   }
   
-  .table-container {
-    overflow-x: auto;
+  .search-controls > div:first-child {
+    width: 100%;
   }
   
+  .search-controls > div:first-child > div {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table-container table {
+    min-width: 800px;
+    font-size: 0.875rem;
+  }
+  
+  .table-container th,
+  .table-container td {
+    padding: 0.75rem 0.5rem;
+    white-space: nowrap;
+  }
+  
+  .user-info {
+    min-width: 200px;
+  }
+  
+  .floating-btn {
+    transform: scale(0.9);
+    margin: 0 1px;
+  }
+  
+  /* Hide index column on medium screens */
+  .table-container th:first-child,
+  .table-container td:first-child {
+    display: none;
+  }
+}
+
+/* Small-medium screens (640px to 767px) - Large mobile/small tablets */
+@media (min-width: 640px) and (max-width: 767px) {
   .management-users-container {
     padding: 1rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .search-controls {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .search-controls > div:first-child {
+    width: 100%;
+  }
+  
+  .search-controls > div:first-child > div {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .table-container table {
+    min-width: 600px;
+    font-size: 0.8rem;
+  }
+  
+  .table-container th,
+  .table-container td {
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .user-info {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.25rem;
+    min-width: 150px;
+  }
+  
+  .user-info .MuiAvatar-root {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .floating-btn {
+    transform: scale(0.85);
+    margin: 0;
+  }
+  
+  /* Hide index and status columns */
+  .table-container th:first-child,
+  .table-container td:first-child,
+  .table-container th:nth-child(5),
+  .table-container td:nth-child(5) {
+    display: none;
   }
   
   .stats-card .MuiCardContent-root {
@@ -162,76 +343,303 @@
   }
   
   .stats-card .MuiTypography-h4 {
-    font-size: 1.5rem !important;
+    font-size: 1.25rem !important;
   }
 }
 
-@media (max-width: 640px) {
+/* Small screens (480px to 639px) - Mobile landscape */
+@media (min-width: 480px) and (max-width: 639px) {
+  .management-users-container {
+    padding: 0.75rem !important;
+  }
+  
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
   }
   
-  .dialog-content {
-    padding: 1rem;
+  .search-controls {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
   }
   
-  .gradient-text {
-    font-size: 1.5rem !important;
+  .search-controls > div:first-child {
+    width: 100% !important;
   }
   
-  .table-row .MuiIconButton-root {
-    padding: 0.25rem;
+  .search-controls > div:first-child > div {
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  /* Force table responsiveness */
+  .table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    margin: 0 -0.75rem !important;
+    padding: 0 0.75rem !important;
+  }
+  
+  .table-container table {
+    min-width: 450px !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .table-container th,
+  .table-container td {
+    padding: 0.375rem 0.25rem !important;
+    white-space: nowrap !important;
+  }
+  
+  .user-info {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.25rem !important;
+    min-width: 100px !important;
+  }
+  
+  .user-info .MuiAvatar-root {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    font-size: 0.65rem !important;
   }
   
   .floating-btn {
-    transform: scale(0.9);
+    transform: scale(0.8) !important;
+    margin: 0 !important;
   }
   
-  /* Make table more mobile friendly */
+  /* Hide less important columns */
+  .table-container th:first-child,
+  .table-container td:first-child,
+  .table-container th:nth-child(3),
+  .table-container td:nth-child(3),
+  .table-container th:nth-child(5),
+  .table-container td:nth-child(5) {
+    display: none !important;
+  }
+  
+  .stats-card .MuiCardContent-root {
+    padding: 0.75rem !important;
+  }
+  
+  .stats-card .MuiTypography-h4 {
+    font-size: 1.1rem !important;
+  }
+  
+  .gradient-text {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Responsive form elements */
+  .search-controls input,
+  .search-controls select {
+    width: 100% !important;
+    min-width: unset !important;
+    font-size: 0.85rem !important;
+  }
+}
+
+/* Extra small screens (up to 479px) - Mobile portrait */
+@media (max-width: 479px) {
+  .management-users-container {
+    padding: 0.5rem !important;
+    margin: 0 !important;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+  }
+  
+  .search-controls {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  
+  .search-controls > div:first-child {
+    width: 100% !important;
+  }
+  
+  .search-controls > div:first-child > div {
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  /* Force responsive table */
+  .table-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    margin: 0 -0.5rem !important;
+    padding: 0 0.5rem !important;
+  }
+  
   .table-container table {
-    font-size: 0.875rem;
+    min-width: 350px !important;
+    font-size: 0.7rem !important;
+    width: 100% !important;
+  }
+  
+  .table-container th,
+  .table-container td {
+    padding: 0.25rem 0.125rem !important;
+    white-space: nowrap !important;
+  }
+  
+  /* Compact user info */
+  .user-info {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+    min-width: 80px !important;
+  }
+  
+  .user-info .MuiAvatar-root {
+    width: 1rem !important;
+    height: 1rem !important;
+    font-size: 0.5rem !important;
+  }
+  
+  .user-info > div {
+    flex: 1 !important;
+    overflow: hidden !important;
+  }
+  
+  .user-info .text-sm {
+    font-size: 0.6rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  /* Compact action buttons */
+  .floating-btn {
+    transform: scale(0.7) !important;
+    margin: 0 !important;
+    min-width: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    padding: 1px !important;
+  }
+  
+  /* Show only essential columns */
+  .table-container th:first-child,
+  .table-container td:first-child,
+  .table-container th:nth-child(3),
+  .table-container td:nth-child(3),
+  .table-container th:nth-child(5),
+  .table-container td:nth-child(5) {
+    display: none !important;
+  }
+  
+  /* Compact stats cards */
+  .stats-card .MuiCardContent-root {
+    padding: 0.375rem !important;
+  }
+  
+  .stats-card .MuiTypography-h4 {
+    font-size: 0.9rem !important;
+  }
+  
+  .stats-card .MuiTypography-body2 {
+    font-size: 0.65rem !important;
+  }
+  
+  .gradient-text {
+    font-size: 1rem !important;
+  }
+  
+  /* Compact dialog */
+  .dialog-content {
+    padding: 0.5rem !important;
+  }
+  
+  .table-row .MuiIconButton-root {
+    padding: 0.05rem !important;
+  }
+  
+  /* Compact chips */
+  .role-badge {
+    transform: scale(0.8) !important;
+    transform-origin: left center !important;
+  }
+  
+  .role-badge .MuiChip-label {
+    font-size: 0.6rem !important;
+    padding: 0 2px !important;
+  }
+  
+  .role-badge .MuiSvgIcon-root {
+    font-size: 0.6rem !important;
+  }
+  
+  /* Force form elements to be responsive */
+  .search-controls input,
+  .search-controls select {
+    width: 100% !important;
+    min-width: unset !important;
+    font-size: 0.8rem !important;
+    padding: 0.5rem !important;
+  }
+  
+  /* Table header adjustments */
+  .table-container thead th {
+    font-size: 0.6rem !important;
+    padding: 0.25rem 0.125rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+  }
+  
+  /* Card spacing */
+  .mb-6 {
+    margin-bottom: 1rem !important;
+  }
+  
+  .p-6 {
+    padding: 0.75rem !important;
+  }
+}
+
+/* Show all columns on larger screens */
+@media (min-width: 992px) {
+  .table-container th:first-child,
+  .table-container td:first-child,
+  .table-container th:nth-child(3),
+  .table-container td:nth-child(3),
+  .table-container th:nth-child(5),
+  .table-container td:nth-child(5) {
+    display: table-cell;
+  }
+}
+
+/* Specific improvements for laptop screens */
+@media (min-width: 1024px) and (max-width: 1366px) {
+  .management-users-container {
+    padding: 1.25rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+  }
+  
+  .search-controls {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  
+  .search-controls > div:first-child {
+    flex: 1;
+    max-width: 70%;
+  }
+  
+  .table-container {
+    font-size: 0.9rem;
   }
   
   .table-container th,
   .table-container td {
     padding: 0.75rem 0.5rem;
-  }
-  
-  /* Stack user info vertically on mobile */
-  .user-info {
-    flex-direction: column;
-    align-items: flex-start !important;
-    gap: 0.5rem;
-  }
-  
-  .user-info .MuiAvatar-root {
-    width: 2rem !important;
-    height: 2rem !important;
-    font-size: 0.875rem !important;
-  }
-  
-  /* Hide less important columns on small screens */
-  .table-container th:first-child,
-  .table-container td:first-child {
-    display: none;
-  }
-  
-  .table-container th:nth-child(5),
-  .table-container td:nth-child(5) {
-    display: none;
-  }
-}
-
-/* Show all columns on larger screens */
-@media (min-width: 768px) {
-  .table-container th:first-child,
-  .table-container td:first-child {
-    display: table-cell;
-  }
-  
-  .table-container th:nth-child(5),
-  .table-container td:nth-child(5) {
-    display: table-cell;
   }
 }
 
@@ -254,6 +662,514 @@
 
 .role-badge:hover::before {
   left: 100%;
+}
+
+/* Button Ripple Effect */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-ripple:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Additional responsive improvements */
+
+/* Search input responsiveness */
+.search-input {
+  width: 100%;
+  min-width: 200px;
+}
+
+@media (max-width: 768px) {
+  .search-input {
+    min-width: unset;
+    width: 100%;
+  }
+}
+
+/* Card responsiveness */
+.stats-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-height: 120px;
+}
+
+@media (max-width: 640px) {
+  .stats-card {
+    min-height: 100px;
+  }
+}
+
+/* Dialog responsiveness */
+@media (max-width: 768px) {
+  .MuiDialog-paper {
+    margin: 1rem !important;
+    width: calc(100% - 2rem) !important;
+    max-width: unset !important;
+  }
+  
+  .MuiDialogTitle-root {
+    padding: 1rem !important;
+  }
+  
+  .MuiDialogContent-root {
+    padding: 1rem !important;
+  }
+  
+  .MuiDialogActions-root {
+    padding: 1rem !important;
+  }
+}
+
+/* Action buttons responsiveness */
+@media (max-width: 640px) {
+  .table-row .floating-btn {
+    min-width: 24px;
+    width: 24px;
+    height: 24px;
+    padding: 2px;
+  }
+  
+  .table-row .floating-btn .MuiSvgIcon-root {
+    font-size: 0.875rem;
+  }
+}
+
+/* Chip responsiveness */
+@media (max-width: 640px) {
+  .role-badge .MuiChip-label {
+    font-size: 0.7rem !important;
+    padding: 0 4px !important;
+  }
+  
+  .role-badge .MuiSvgIcon-root {
+    font-size: 0.7rem !important;
+  }
+}
+
+/* Tooltip responsiveness */
+@media (max-width: 768px) {
+  .MuiTooltip-tooltip {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Form controls in search section */
+@media (max-width: 991px) {
+  .search-controls select,
+  .search-controls input {
+    min-width: unset;
+    width: 100%;
+  }
+  
+  .search-controls .relative {
+    width: 100%;
+  }
+}
+
+/* Improve horizontal scrolling experience */
+.table-container {
+  position: relative;
+}
+
+@media (max-width: 991px) {
+  .table-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 100%;
+    background: linear-gradient(to left, rgba(255,255,255,0.8), transparent);
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+/* Container max-width for very large screens */
+@media (min-width: 1400px) {
+  .management-users-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 768px) {
+  .MuiIconButton-root {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+  
+  .MuiButton-root {
+    min-height: 44px !important;
+  }
+  
+  select,
+  input[type="text"] {
+    min-height: 44px !important;
+  }
+}
+
+/* Additional mobile overrides for very small screens */
+@media (max-width: 400px) {
+  .management-users-container {
+    padding: 0.25rem !important;
+    margin: 0 !important;
+  }
+  
+  .stats-grid {
+    gap: 0.25rem !important;
+  }
+  
+  .table-container {
+    margin: 0 -0.25rem !important;
+    padding: 0 0.25rem !important;
+  }
+  
+  .table-container table {
+    min-width: 300px !important;
+    font-size: 0.65rem !important;
+  }
+  
+  .table-container th,
+  .table-container td {
+    padding: 0.125rem 0.05rem !important;
+  }
+  
+  .floating-btn {
+    transform: scale(0.6) !important;
+    min-width: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  .user-info .MuiAvatar-root {
+    width: 0.8rem !important;
+    height: 0.8rem !important;
+    font-size: 0.4rem !important;
+  }
+  
+  .role-badge {
+    transform: scale(0.7) !important;
+  }
+  
+  .stats-card .MuiCardContent-root {
+    padding: 0.25rem !important;
+  }
+  
+  .stats-card .MuiTypography-h4 {
+    font-size: 0.8rem !important;
+  }
+  
+  .search-controls input,
+  .search-controls select {
+    font-size: 0.75rem !important;
+    padding: 0.375rem !important;
+  }
+}
+
+/* Force mobile layout for screens under 640px */
+@media (max-width: 640px) {
+  /* Override any flex or grid that might not be working */
+  .search-controls {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  
+  .search-controls > div {
+    width: 100% !important;
+    flex: none !important;
+  }
+  
+  .search-controls .relative {
+    width: 100% !important;
+  }
+  
+  /* Force full width on form controls */
+  .search-controls input,
+  .search-controls select {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Ensure table is scrollable */
+  .table-container {
+    overflow: auto !important;
+    width: 100% !important;
+  }
+  
+  /* Stack grid items */
+  .stats-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+  
+  /* Mobile dialog improvements */
+  .MuiDialog-container {
+    padding: 0.5rem !important;
+  }
+  
+  .MuiDialog-paper {
+    margin: 0.5rem !important;
+    width: calc(100% - 1rem) !important;
+    max-width: none !important;
+    max-height: calc(100% - 1rem) !important;
+  }
+}
+
+/* ======================================= */
+/* AGGRESSIVE MOBILE OVERRIDES FOR SMALL SCREENS */
+/* ======================================= */
+
+/* Universal mobile reset for all small screens */
+@media screen and (max-width: 640px) {
+  /* Container overrides */
+  .management-users-container,
+  .management-users-container * {
+    box-sizing: border-box !important;
+  }
+  
+  .management-users-container {
+    padding: 0.5rem !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Grid system override */
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Search controls override */
+  .search-controls {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+  }
+  
+  .search-controls > div {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .search-controls .flex {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+  
+  .search-controls .flex > div {
+    width: 100% !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  /* Form elements override */
+  .search-controls input,
+  .search-controls select,
+  .search-input,
+  .custom-role-select {
+    width: 100% !important;
+    min-width: unset !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    font-size: 0.9rem !important;
+    padding: 0.75rem !important;
+  }
+  
+  /* Table container override */
+  .table-container {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+    margin: 0 -0.5rem !important;
+    padding: 0 0.5rem !important;
+  }
+  
+  .table-container table {
+    min-width: 400px !important;
+    width: max-content !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .table-container th,
+  .table-container td {
+    padding: 0.5rem 0.25rem !important;
+    white-space: nowrap !important;
+    font-size: 0.8rem !important;
+  }
+  
+  /* User info compact layout */
+  .user-info {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    min-width: 120px !important;
+  }
+  
+  .user-info .MuiAvatar-root {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    font-size: 0.75rem !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .user-info > div {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  
+  .user-info .text-sm {
+    font-size: 0.75rem !important;
+    line-height: 1.2 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  
+  /* Action buttons compact */
+  .floating-btn {
+    transform: scale(0.8) !important;
+    margin: 0 1px !important;
+    min-width: 28px !important;
+    width: 28px !important;
+    height: 28px !important;
+    padding: 2px !important;
+  }
+  
+  /* Stats cards compact */
+  .stats-card {
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .stats-card .MuiCardContent-root {
+    padding: 1rem !important;
+  }
+  
+  .stats-card .MuiTypography-h4 {
+    font-size: 1.2rem !important;
+  }
+  
+  .stats-card .MuiTypography-body2 {
+    font-size: 0.8rem !important;
+  }
+  
+  /* Chips and badges compact */
+  .role-badge {
+    transform: scale(0.9) !important;
+    transform-origin: left center !important;
+  }
+  
+  .role-badge .MuiChip-label {
+    font-size: 0.7rem !important;
+    padding: 0 4px !important;
+  }
+  
+  /* Hide non-essential columns on mobile */
+  .table-container th:first-child,
+  .table-container td:first-child {
+    display: none !important;
+  }
+  
+  /* Card spacing adjustments */
+  .mb-6 {
+    margin-bottom: 1rem !important;
+  }
+  
+  .p-6 {
+    padding: 0.75rem !important;
+  }
+  
+  /* Ensure Material-UI components are responsive */
+  .MuiCard-root {
+    margin: 0.25rem 0 !important;
+  }
+  
+  .MuiCardContent-root {
+    padding: 0.75rem !important;
+  }
+  
+  /* Dialog responsive */
+  .MuiDialog-paper {
+    margin: 0.5rem !important;
+    max-width: calc(100% - 1rem) !important;
+    width: calc(100% - 1rem) !important;
+  }
+  
+  .MuiDialogTitle-root,
+  .MuiDialogContent-root,
+  .MuiDialogActions-root {
+    padding: 1rem !important;
+  }
+}
+
+/* Extra small screens (phones) */
+@media screen and (max-width: 480px) {
+  .management-users-container {
+    padding: 0.25rem !important;
+  }
+  
+  .table-container table {
+    min-width: 350px !important;
+    font-size: 0.7rem !important;
+  }
+  
+  .table-container th,
+  .table-container td {
+    padding: 0.25rem 0.125rem !important;
+    font-size: 0.7rem !important;
+  }
+  
+  .floating-btn {
+    transform: scale(0.7) !important;
+    min-width: 24px !important;
+    width: 24px !important;
+    height: 24px !important;
+  }
+  
+  .user-info .MuiAvatar-root {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    font-size: 0.6rem !important;
+  }
+  
+  .stats-card .MuiCardContent-root {
+    padding: 0.5rem !important;
+  }
+  
+  .stats-card .MuiTypography-h4 {
+    font-size: 1rem !important;
+  }
+  
+  /* Hide email column on very small screens */
+  .table-container th:nth-child(3),
+  .table-container td:nth-child(3) {
+    display: none !important;
+  }
 }
 
 /* Button Ripple Effect */
