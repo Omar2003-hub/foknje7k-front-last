@@ -49,6 +49,7 @@ import {
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import "./management-users.css";
+import { getUsersFromIDB, setUsersToIDB } from '../../../utils/idbUsers';
 
 interface User {
   id: number;
@@ -77,6 +78,9 @@ const ManagementUsers: React.FC = () => {
   const [roleFilter, setRoleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [sortCreatedAt, setSortCreatedAt] = useState<"asc" | "desc">("desc");
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 20;
 
   // Helper function to get role icon
   const getRoleIcon = (role: string) => {
@@ -158,6 +162,12 @@ const ManagementUsers: React.FC = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      // Try to get users from IndexedDB first
+      const cachedUsers = await getUsersFromIDB();
+      if (cachedUsers && Array.isArray(cachedUsers)) {
+        setUsers(cachedUsers);
+      }
+      // Always fetch latest users from API
       const res = await getAllUsersService();
       const rawList = res?.data || res || [];
       
@@ -167,6 +177,7 @@ const ManagementUsers: React.FC = () => {
         isEnabled: typeof user.isEnabled === 'boolean' ? user.isEnabled : (typeof user.enabled === 'boolean' ? user.enabled : undefined)
       }));
       setUsers(list);
+      setUsersToIDB('users', list);
     } catch (e) {
       console.error(e);
       snackbarContext?.showMessage?.("Error", "Failed to fetch users", "error");
@@ -310,6 +321,18 @@ const ManagementUsers: React.FC = () => {
     });
     return result;
   }, [users, query, roleFilter, statusFilter, sortCreatedAt]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filtered.length / usersPerPage);
+  const paginatedUsers = useMemo(() => {
+    const startIdx = (currentPage - 1) * usersPerPage;
+    return filtered.slice(startIdx, startIdx + usersPerPage);
+  }, [filtered, currentPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, roleFilter, statusFilter, sortCreatedAt]);
 
   // Get unique roles for filter dropdown
   const availableRoles = useMemo(() => {
@@ -543,7 +566,7 @@ const ManagementUsers: React.FC = () => {
                     </td>
                   </tr>
                 ) : filtered && filtered.length > 0 ? (
-                  filtered.map((user, index) => {
+                  paginatedUsers.map((user, index) => {
                     const userRole = typeof user.role === "string" ? user.role : user.role?.name || "";
                     const isEnabled = getUserStatus(user);
                     const statusDisplay = getStatusDisplay(isEnabled);
@@ -552,7 +575,7 @@ const ManagementUsers: React.FC = () => {
                         <tr className="table-row transition-all duration-200 hover:bg-blue-50/50 group">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-semibold text-gray-700">
-                              {index + 1}
+                              {(currentPage - 1) * usersPerPage + index + 1}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -658,6 +681,108 @@ const ManagementUsers: React.FC = () => {
             </table>
           </div>
         </Card>
+
+        {/* Pagination Controls */}
+        {filtered.length > 0 && (
+          <Card className="mt-6 border-0 shadow-lg glass-effect">
+            <CardContent className="p-4">
+              <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                {/* Page Info */}
+                <div className="text-sm text-gray-600">
+                  Affichage {(currentPage - 1) * usersPerPage + 1} à {Math.min(currentPage * usersPerPage, filtered.length)} sur {filtered.length} utilisateurs
+                </div>
+
+                {/* Pagination Buttons */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outlined"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(1)}
+                    size="small"
+                    style={{
+                      minWidth: 80,
+                      color: "#09745f",
+                      borderColor: "#09745f"
+                    }}
+                  >
+                    Premier
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    size="small"
+                    style={{
+                      color: "#09745f",
+                      borderColor: "#09745f"
+                    }}
+                  >
+                    Précédent
+                  </Button>
+                  
+                  {/* Page Numbers */}
+                  <div className="flex gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum: number;
+                      if (totalPages <= 5) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "contained" : "outlined"}
+                          onClick={() => setCurrentPage(pageNum)}
+                          size="small"
+                          style={{
+                            minWidth: 40,
+                            padding: "6px 12px",
+                            backgroundColor: currentPage === pageNum ? "#09745f" : undefined,
+                            color: currentPage === pageNum ? "#fff" : "#09745f",
+                            borderColor: "#09745f"
+                          }}
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
+                  </div>
+
+                  <Button
+                    variant="outlined"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    size="small"
+                    style={{
+                      color: "#09745f",
+                      borderColor: "#09745f"
+                    }}
+                  >
+                    Suivant
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(totalPages)}
+                    size="small"
+                    style={{
+                      minWidth: 80,
+                      color: "#09745f",
+                      borderColor: "#09745f"
+                    }}
+                  >
+                    Dernier
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* View Dialog */}

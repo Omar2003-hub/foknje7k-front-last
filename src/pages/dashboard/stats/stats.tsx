@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { getStatsFromIDB, setStatsToIDB } from '../../../utils/idbStats';
 import { BoxStat, MontantStat, TotalStat, UserStat } from "../../../assets/svg";
 import { getStatService } from "../../../services/playList-service";
 import "./stats.css";
@@ -29,9 +30,22 @@ const Stats: React.FC = () => {
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    getStatService()
-      .then((res) => setData(res.data))
-      .catch(() => {});
+    async function fetchStats() {
+      // Try to get stats from IndexedDB first
+      const cachedStats = await getStatsFromIDB('stats');
+      if (cachedStats) {
+        setData(cachedStats);
+      }
+      // Always fetch latest stats from API
+      try {
+        const res = await getStatService();
+        setData(res.data);
+        setStatsToIDB('stats', res.data);
+      } catch (e) {
+        // fallback: keep cached data if API fails
+      }
+    }
+    fetchStats();
   }, []);
 
   return (
