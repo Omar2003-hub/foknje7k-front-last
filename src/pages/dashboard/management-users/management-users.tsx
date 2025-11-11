@@ -159,25 +159,30 @@ const ManagementUsers: React.FC = () => {
     };
   };
 
-  const fetchUsers = async () => {
+  const CACHE_MAX_AGE = 10 * 60 * 1000; // 10 minutes
+  const fetchUsers = async (forceRefresh = false) => {
+    let usedCache = false;
     try {
       setLoading(true);
       // Try to get users from IndexedDB first
-      const cachedUsers = await getUsersFromIDB();
-      if (cachedUsers && Array.isArray(cachedUsers)) {
-        setUsers(cachedUsers);
+      const cached = await getUsersFromIDB();
+      if (!forceRefresh && cached && Array.isArray(cached.users)) {
+        setUsers(cached.users);
+        usedCache = true;
       }
-      // Always fetch latest users from API
-      const res = await getAllUsersService();
-      const rawList = res?.data || res || [];
-      
-      const list = rawList.map((user: any) => ({
-        ...user,
-        phoneNumber: user.phoneNumber || user.phone || user.telephone || user.tel || "",
-        isEnabled: typeof user.isEnabled === 'boolean' ? user.isEnabled : (typeof user.enabled === 'boolean' ? user.enabled : undefined)
-      }));
-      setUsers(list);
-      setUsersToIDB('users', list);
+      // If no cache or cache is old, or forceRefresh, fetch from API
+      const now = Date.now();
+      if (forceRefresh || !cached || !cached.timestamp || now - cached.timestamp > CACHE_MAX_AGE) {
+        const res = await getAllUsersService();
+        const rawList = res?.data || res || [];
+        const list = rawList.map((user: any) => ({
+          ...user,
+          phoneNumber: user.phoneNumber || user.phone || user.telephone || user.tel || "",
+          isEnabled: typeof user.isEnabled === 'boolean' ? user.isEnabled : (typeof user.enabled === 'boolean' ? user.enabled : undefined)
+        }));
+        setUsers(list);
+        setUsersToIDB('users', list, now);
+      }
     } catch (e) {
       console.error(e);
       snackbarContext?.showMessage?.("Error", "Failed to fetch users", "error");
@@ -211,6 +216,7 @@ const ManagementUsers: React.FC = () => {
       // Only set educationLevel for non-teacher roles
       ...(userRole !== "ROLE_TEACHER" && userRole !== "ROLE_SUPER_TEACHER" ? { educationLevel: user.educationLevel || "" } : {}),
       isEnabled: typeof user.isEnabled === 'boolean' ? user.isEnabled : getUserStatus(user),
+    phoneNumber: user.phoneNumber || "",
     });
     setEditOpen(true);
   };
@@ -242,10 +248,15 @@ const ManagementUsers: React.FC = () => {
         const { educationLevel, ...withoutEducation } = payload;
         payload = withoutEducation;
       }
-      await updateUserService(selectedUser.id, payload);
+      const updatedUser = await updateUserService(selectedUser.id, payload);
       snackbarContext?.showMessage?.("Success", "User updated", "success");
+      // Update local state instantly
+      setUsers(prev => {
+        const newList = prev.map(u => u.id === selectedUser.id ? { ...u, ...payload } : u);
+        setUsersToIDB('users', newList, Date.now());
+        return newList;
+      });
       handleEditClose();
-      fetchUsers();
     } catch (e) {
       console.error(e);
       snackbarContext?.showMessage?.("Error", "Failed to update user", "error");
@@ -278,7 +289,8 @@ const ManagementUsers: React.FC = () => {
         `Utilisateur ${newStatus ? 'activé' : 'désactivé'}`,
         "success"
       );
-      fetchUsers();
+  await fetchUsers();
+  setUsersToIDB('users', users, Date.now());
     } catch (e) {
       console.error(e);
       snackbarContext?.showMessage?.("Error", "Failed to update user status", "error");
@@ -516,7 +528,7 @@ const ManagementUsers: React.FC = () => {
               <div className="flex gap-3">
                 <Tooltip title="Actualiser la liste">
                   <IconButton
-                    onClick={fetchUsers}
+                    onClick={() => fetchUsers(true)}
                     className="text-blue-600 floating-btn bg-blue-50 hover:bg-blue-100"
                     disabled={loading}
                   >
@@ -1066,6 +1078,35 @@ const ManagementUsers: React.FC = () => {
                 </CardContent>
               </Card>
 
+                {/* Phone Number Field */}
+                <Card className="transition-all duration-300 border-0 shadow-lg hover:shadow-xl group">
+                  <CardContent className="p-6">
+                    <div className="flex items-center mb-4 space-x-3">
+                      <div className="p-2 transition-colors duration-300 bg-yellow-100 rounded-lg group-hover:bg-yellow-200">
+                        <FontAwesomeIcon icon={faPhone} className="text-yellow-600" />
+                      </div>
+                      <Typography variant="h6" className="font-semibold text-gray-800">
+                        Numéro de téléphone
+                      </Typography>
+                    </div>
+                    <TextField 
+                      label="Numéro de téléphone" 
+                      type="tel"
+                      value={form.phoneNumber || ""}
+                      onChange={e => setForm({ ...form, phoneNumber: e.target.value })}
+                      fullWidth 
+                      variant="outlined"
+                      className="bg-white rounded-xl"
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '12px',
+                          '&:hover fieldset': { borderColor: '#10b981' },
+                          '&.Mui-focused fieldset': { borderColor: '#10b981' }
+                        }
+                      }}
+                    />
+                  </CardContent>
+                </Card>
               {/* Email Field */}
               <Card className="transition-all duration-300 border-0 shadow-lg hover:shadow-xl group">
                 <CardContent className="p-6">

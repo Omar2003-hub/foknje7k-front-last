@@ -29,29 +29,49 @@ const MiniStat: React.FC<{
 const Stats: React.FC = () => {
   const [data, setData] = useState<any>(null);
 
-  useEffect(() => {
-    async function fetchStats() {
-      // Try to get stats from IndexedDB first
-      const cachedStats = await getStatsFromIDB('stats');
-      if (cachedStats) {
-        setData(cachedStats);
+  const CACHE_MAX_AGE = 10 * 60 * 1000; // 10 minutes
+  const [loading, setLoading] = useState(false);
+
+  const fetchStats = async (forceRefresh = false) => {
+    try {
+      setLoading(true);
+      const cached = await getStatsFromIDB('stats');
+      if (!forceRefresh && cached && cached.stats) {
+        setData(cached.stats);
       }
-      // Always fetch latest stats from API
-      try {
-        const res = await getStatService();
-        setData(res.data);
-        setStatsToIDB('stats', res.data);
-      } catch (e) {
-        // fallback: keep cached data if API fails
+      const now = Date.now();
+      if (forceRefresh || !cached || !cached.timestamp || now - cached.timestamp > CACHE_MAX_AGE) {
+        try {
+          const res = await getStatService();
+          setData(res.data);
+          setStatsToIDB('stats', res.data, now);
+        } catch (e) {
+          // fallback: keep cached data if API fails
+        }
       }
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchStats();
   }, []);
 
   return (
     <div className="p-6">
       <div className="mx-auto max-w-7xl">
-        <h1 className="mb-6 text-3xl font-bold text-gray-900">Statistiques</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Statistiques</h1>
+          <button
+            className="px-4 py-2 text-green-700 transition border border-green-700 rounded-lg hover:bg-green-50"
+            onClick={() => fetchStats(true)}
+            disabled={loading}
+            title="Rafraîchir les statistiques"
+          >
+            {loading ? 'Chargement...' : 'Rafraîchir'}
+          </button>
+        </div>
 
         <div className="p-6 border border-gray-100 main-card bg-gray-50 rounded-2xl">
           <div className="grid grid-cols-1 gap-6 mb-6 lg:grid-cols-2">

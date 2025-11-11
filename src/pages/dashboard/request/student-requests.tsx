@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { getStudentRequestsFromIDB, setStudentRequestsToIDB, clearStudentRequestsCache } from '../../../utils/idbStudentRequests';
 import CustomTable from "../../../shared/custom-table/custom-table";
 import { columnsRequestsStudent } from "../../../mocks/fakeData";
 import {
@@ -38,6 +39,7 @@ interface RequestData {
 type TableData = Record<string, any>;
 
 const Requests = () => {
+  const CACHE_MAX_AGE = 10 * 60 * 1000; // 10 minutes
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState<RequestData | null>(null);
   const [data, setData] = useState<RequestData[]>([]);
@@ -53,17 +55,35 @@ const Requests = () => {
 
   const fetchData = async () => {
     try {
+      // Try to get cached requests from IndexedDB
+      const cached = await getStudentRequestsFromIDB();
+      const now = Date.now();
+
+      if (cached && Array.isArray(cached.requests) && cached.timestamp && now - cached.timestamp < CACHE_MAX_AGE) {
+        setData(cached.requests);
+        setOriginalData(cached.requests);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
+      let subjectsArr: any[] = [];
+      // Always fetch subjects fresh (they may change)
       const subjectsRes = await getAvailableSubjects();
-      const subjectsArr = Array.isArray(subjectsRes) ? subjectsRes : subjectsRes.data || [];
+      subjectsArr = Array.isArray(subjectsRes) ? subjectsRes : subjectsRes.data || [];
       setSubjectsList(subjectsArr);
 
+      // If no cache or cache is old, fetch from API
       const res = await getAllStudentRequests();
-
       const formattedData = res.data.map((item: any) => {
-        const subjectCount = Array.isArray(item.subjectIds) ? item.subjectIds.length : 0;
+        const subjectNames = Array.isArray(item.subjectIds)
+          ? item.subjectIds.map((id: number | string) => {
+              const found = subjectsArr.find((sub: any) => sub.id === id || sub.value === id);
+              return found ? (found.speciality || found.label || id) : id;
+            }).join(', ')
+          : 'Aucune matière';
         const unitPrice = item.studentOffer?.price ?? 0;
-        const total = unitPrice * subjectCount;
+        const total = unitPrice * (Array.isArray(item.subjectIds) ? item.subjectIds.length : 0);
         const isFree = total === 0;
 
         return {
@@ -76,18 +96,19 @@ const Requests = () => {
           startDate: item.startDate,
           endDate: item.status === "PENDING" ? "N/A" : item.endDate,
           paymentImageUrl: item.paymentImageUrl || "#",
-          subjectCount: isFree ? "tous les matières" : subjectCount,
+          subjects: isFree ? "tous les matières" : subjectNames,
           totalPrice: isFree ? "Free" : `${total} TND`,
         };
       });
-
       setData(formattedData);
       setOriginalData(formattedData);
+      setStudentRequestsToIDB('studentRequests', formattedData, now);
     } catch (e) {
       console.error("Error fetching data:", e);
     } finally {
       setLoading(false);
     }
+
   };
 
   useEffect(() => {
@@ -166,13 +187,18 @@ const Requests = () => {
 
   const handleActionConfirm = async () => {
     if (!selectedRow) return;
+    setLoading(true);
     try {
       await respondOfferService(selectedRow.id, slectedStatus);
+      // Clear cache before fetching new data
+      await clearStudentRequestsCache();
       await fetchData();
       setOpenConfirmDialog(false);
       setSelectedRow(null);
     } catch (e) {
       console.error("Error responding to offer:", e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -220,8 +246,26 @@ const Requests = () => {
     );
   };
 
+
+  // On refresh, clear cache and fetch new data
+  const handleRefresh = async () => {
+    setLoading(true);
+    await clearStudentRequestsCache();
+    await fetchData();
+  };
+
   return (
     <div className="w-full p-1 lg:p-10">
+      <div className="flex justify-end mb-4">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => handleRefresh()}
+          disabled={loading}
+        >
+          Actualiser
+        </Button>
+      </div>
       <div className="flex flex-col items-start justify-between w-full mb-5 space-y-4 md:flex-row md:items-center md:space-y-0">
         <h1 className="text-2xl text-title font-montserrat_bold md:text-3xl">
           Les Demandes des élèves
@@ -306,8 +350,8 @@ const Requests = () => {
           columns={[
             ...columnsRequestsStudent,
             {
-              Header: "Nombre de matières",
-              accessor: "subjectCount",
+              Header: "Matières",
+              accessor: "subjects",
             },
             {
               Header: "Prix total",
