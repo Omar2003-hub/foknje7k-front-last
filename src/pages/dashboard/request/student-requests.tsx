@@ -16,6 +16,7 @@ import {
   Grid,
   Button,
 } from "@mui/material";
+import RefreshIcon from '@mui/icons-material/Refresh';
 import {
   getAllStudentRequests,
   respondOfferService,
@@ -259,9 +260,15 @@ const Requests = () => {
       <div className="flex justify-end mb-4">
         <Button
           variant="contained"
-          color="primary"
           onClick={() => handleRefresh()}
           disabled={loading}
+          sx={{
+            backgroundColor: '#4CAF50',
+            '&:hover': {
+              backgroundColor: '#388E3C',
+            },
+          }}
+          startIcon={<RefreshIcon />}
         >
           Actualiser
         </Button>
