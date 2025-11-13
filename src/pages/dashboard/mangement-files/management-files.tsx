@@ -121,9 +121,9 @@ const ManagementFiles = () => {
 
   const renderActions = (row: any) => <ActionButtons row={row} />;
   return (
-    <div className="p-1 lg:p-10 w-full">
-      <div className="w-full flex flex-col md:flex-row justify-between items-start md:items-center mb-5 space-y-4 md:space-y-0">
-        <h1 className="text-title font-montserrat_bold text-2xl md:text-3xl">
+    <div className="w-full p-1 lg:p-10">
+      <div className="flex flex-col items-start justify-between w-full mb-5 space-y-4 md:flex-row md:items-center md:space-y-0">
+        <h1 className="text-2xl text-title font-montserrat_bold md:text-3xl">
           Les Fichiers
         </h1>
         <CustomSelect
@@ -148,8 +148,8 @@ const ManagementFiles = () => {
         maxWidth="sm"
       >
         <Box className="p-6">
-          <DialogTitle className="flex justify-between items-center">
-            <p className="text-title font-montserrat_bold text-2xl">
+          <DialogTitle className="flex items-center justify-between">
+            <p className="text-2xl text-title font-montserrat_bold">
               Supprimer Fichier
             </p>
             <IconButton onClick={handleDeleteClose}>

@@ -42,6 +42,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
 }) => {
   const [isTouched, setIsTouched] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [fileName, setFileName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const togglePasswordVisibility = () => {
@@ -60,6 +61,18 @@ const CustomInput: React.FC<CustomInputProps> = ({
 
   const handleFileClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setFileName(file.name);
+    } else {
+      setFileName("");
+    }
+    if (onChange) {
+      onChange(event);
+    }
   };
 
   return (
@@ -82,6 +95,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
             <input
               type="text"
               placeholder={placeholder}
+              value={fileName}
               readOnly
               className={`border text-xs font-montserrat_regular border-border h-12 rounded-lg  w-full pr-8 ${
                 iconPrefix ? "ps-12" : "ps-3"
@@ -92,7 +106,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
               type="file"
               ref={fileInputRef}
               className="hidden"
-              onChange={onChange}
+              onChange={handleFileChange}
               name={name}
             />
             <button

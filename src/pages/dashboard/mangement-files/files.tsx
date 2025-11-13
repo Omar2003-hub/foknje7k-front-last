@@ -69,10 +69,20 @@ const Files = () => {
     if (selectedGroupId) {
       getAllSubjectsByGroupId(selectedGroupId)
         .then((res) => {
-          const subjectsOptions = res.data.map((item: any) => ({
-            label: item.speciality,
-            value: item.id,
-          }));
+          const subjectsOptions = res.data.map((item: any) => {
+            let teacherName = '';
+            if (item.teacher && item.teacher.name) {
+              teacherName = item.teacher.name;
+            } else if (item.teacherName) {
+              teacherName = item.teacherName;
+            } else if (item.teacherId) {
+              teacherName = item.teacherId;
+            }
+            return {
+              label: teacherName ? `${item.speciality} (Prof: ${teacherName})` : item.speciality,
+              value: item.id,
+            };
+          });
           setAllSubjects(res.data);
           setSubjects(subjectsOptions);
         })
@@ -488,6 +498,22 @@ const Files = () => {
             onChange={handleInputChange}
           />
 
+          <CustomSelectDashboard
+            options={[
+              { value: "youtube", label: "Youtube Video" },
+              { value: "video", label: "Vidéo" },
+              { value: "qcm", label: "QCM" },
+              { value: "fiche", label: "Fichier" },
+              { value: "exercice", label: "Exercice" },
+              { value: "correction", label: "Correction" },
+            ]}
+            value={formData.segment}
+            onChange={handleSelectChange}
+            name="segment"
+            iconSuffix={ListIcon}
+            label={"Le Segment"}
+          />
+
           {formData.segment === 'youtube' ? (
             <CustomInput
               label={"Ajouter Youtube Url"}
@@ -512,35 +538,15 @@ const Files = () => {
             />
           )}
 
-          {/* Section for Playlist and Segment Select */}
-          <div className="flex flex-col justify-between w-full mt-6 md:flex-row md:mt-0">
-            <CustomSelectDashboard
-              options={playlists}
-              value={formData.playlist}
-              onChange={handleSelectChange}
-              name="playlist"
-              iconSuffix={LibraryMusicIcon}
-              label={"Le chapitre"}
-            />
-
-            <div className="w-0 md:w-10"></div>
-
-            <CustomSelectDashboard
-              options={[
-                { value: "youtube", label: "Youtube Video" },
-                { value: "video", label: "Vidéo" },
-                { value: "qcm", label: "QCM" },
-                { value: "fiche", label: "Fichier" },
-                { value: "exercice", label: "Exercice" },
-                { value: "correction", label: "Correction" },
-              ]}
-              value={formData.segment}
-              onChange={handleSelectChange}
-              name="segment"
-              iconSuffix={ListIcon}
-              label={"Le Segment"}
-            />
-          </div>
+          {/* Section for Playlist Select */}
+          <CustomSelectDashboard
+            options={playlists}
+            value={formData.playlist}
+            onChange={handleSelectChange}
+            name="playlist"
+            iconSuffix={LibraryMusicIcon}
+            label={"Le chapitre"}
+          />
 
           <div className="flex justify-end w-full mt-10 md:mt-20">
             <CustomButton

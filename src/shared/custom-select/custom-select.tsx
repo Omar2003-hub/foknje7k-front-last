@@ -10,6 +10,7 @@ interface CustomSelectProps {
   onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   name?: string;
   placeholder?: string;
+  labelClasses?: string;
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -22,10 +23,11 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   onChange,
   name,
   placeholder,
+  labelClasses,
 }) => {
   return (
     <div className={`relative ${width} ${customStyle}`}>
-      <label className="block text-title text-xs font-montserrat_regular mb-2">
+      <label className={`${labelClasses ? labelClasses : "block text-title text-xs font-montserrat_regular mb-2"}`}>
         {label}
       </label>
       <div className="relative">

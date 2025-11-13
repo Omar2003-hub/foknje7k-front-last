@@ -80,7 +80,12 @@ const Requests = () => {
         const subjectNames = Array.isArray(item.subjectIds)
           ? item.subjectIds.map((id: number | string) => {
               const found = subjectsArr.find((sub: any) => sub.id === id || sub.value === id);
-              return found ? (found.speciality || found.label || id) : id;
+              if (found) {
+                const matiere = found.speciality || found.label || id;
+                const level = found.level ? ` (${found.level})` : '';
+                return `${matiere}${level}`;
+              }
+              return id;
             }).join(', ')
           : 'Aucune matière';
         const unitPrice = item.studentOffer?.price ?? 0;
