@@ -27,6 +27,7 @@ import {
   updateStudentOfferService,
 } from "../services/student-offer";
 import { SnackbarContext } from "../config/hooks/use-toast";
+import "./cards.css";
 
 // @ts-ignore
 const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
@@ -171,155 +172,220 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
 
   return (
     <div 
-      className="flex flex-col bg-white shadow-xl rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] w-full max-w-sm h-full"
-      style={{ borderTop: `4px solid ${colors.border}` }}
+      className="group relative flex flex-col bg-white shadow-lg rounded-3xl overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 w-full h-full border border-gray-100"
+      style={{ 
+        background: `linear-gradient(145deg, ${colors.priceBg}15, #ffffff)`,
+        borderTop: `6px solid ${colors.border}`
+      }}
     >
-      <div className="w-full h-48 overflow-hidden">
+      {/* Image Container with Overlay */}
+      <div className="relative w-full h-40 sm:h-48 lg:h-52 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10"></div>
         <img
-          src={offer?.imageUrl || "https://via.placeholder.com/300x192?text=Offre"}
+          src={offer?.imageUrl || "https://via.placeholder.com/300x208?text=Offre+Moderne"}
           alt={offer.title}
-          className="object-cover w-full h-full transition-transform duration-500 hover:scale-110"
+          className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
         />
-      </div>
-
-      {offer.subscribed && (
+        
+        {/* Price Badge - Floating */}
         <div 
-          className="absolute px-3 py-1 text-xs font-semibold rounded-full top-4 right-4"
+          className="absolute top-2 sm:top-4 left-2 sm:left-4 z-20 px-2 sm:px-4 py-1 sm:py-2 rounded-xl sm:rounded-2xl backdrop-blur-md shadow-lg"
           style={{ 
-            backgroundColor: colors.badgeBg,
-            color: colors.badgeText
+            background: `linear-gradient(135deg, ${colors.buttonStart}E6, ${colors.buttonEnd}E6)`,
           }}
         >
-          Abonné
+          <div className="flex items-baseline text-white">
+            <span className="text-lg sm:text-2xl font-bold">{offer.price}</span>
+            <span className="ml-1 text-xs sm:text-sm font-medium">DT</span>
+          </div>
         </div>
-      )}
 
-      <div className="flex flex-col h-full p-6">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h2 
-              className="mb-1 text-xl font-bold"
-              style={{ color: colors.title }}
-            >
-              {offer.title}
-            </h2>
+        {/* Subscription Badge */}
+        {offer.subscribed && (
+          <div 
+            className="absolute top-2 sm:top-4 right-2 sm:right-4 z-20 px-2 sm:px-3 py-1 text-xs font-bold rounded-full backdrop-blur-md shadow-lg"
+            style={{ 
+              backgroundColor: `${colors.check}E6`,
+              color: 'white'
+            }}
+          >
+            ✓ Abonné
+          </div>
+        )}
+
+        {/* Free Offer Badge */}
+        {isFreeOffer && (
+          <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 z-20 px-2 sm:px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold rounded-full shadow-lg animate-pulse">
+            🎉 GRATUIT
+          </div>
+        )}
+      </div>
+
+      {/* Content Container */}
+      <div className="flex flex-col h-full p-4 sm:p-6 relative">
+        {/* Header Section */}
+        <div className="flex items-start justify-between mb-3 sm:mb-5">
+          <div className="flex-1">
+            <div className="flex items-center mb-2">
+              <h2 
+                className="text-lg sm:text-xl font-bold leading-tight"
+                style={{ color: colors.title }}
+              >
+                {offer.title}
+              </h2>
+              {role === "ROLE_ADMIN" && (
+                <div className="ml-auto">
+                  <IconButton 
+                    onClick={handleClick} 
+                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    style={{ color: colors.icon }}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}
+                    anchorOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                    PaperProps={{
+                      style: {
+                        borderRadius: '12px',
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+                      }
+                    }}
+                  >
+                    <MenuItem onClick={handleOpenModal} className="rounded-lg mx-1 my-1">Modifier</MenuItem>
+                    <MenuItem onClick={handleClickAlert} className="rounded-lg mx-1 my-1 text-red-600">Supprimer</MenuItem>
+                  </Menu>
+                </div>
+              )}
+            </div>
             <p 
-              className="font-medium"
+              className="text-sm font-medium leading-relaxed"
               style={{ color: colors.subTitle }}
             >
               {offer.subTitle}
             </p>
           </div>
-          
-          {role === "ROLE_ADMIN" && (
-            <div>
-              <IconButton 
-                onClick={handleClick} 
-                style={{ color: colors.icon }}
-              >
-                <MoreVertIcon />
-              </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleClose}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-              >
-                <MenuItem onClick={handleOpenModal}>Modifier</MenuItem>
-                <MenuItem onClick={handleClickAlert}>Supprimer</MenuItem>
-              </Menu>
-            </div>
-          )}
         </div>
 
-        <div className="h-16 mb-4 overflow-hidden">
-          <p className="text-sm text-gray-600">
+        {/* Description */}
+        <div className="mb-3 sm:mb-5">
+          <p className="text-xs sm:text-sm text-gray-600 leading-relaxed line-clamp-2 sm:line-clamp-3">
             {offer.description}
           </p>
         </div>
 
-        <div className="flex flex-col mb-6">
-          <div 
-            className="flex items-center justify-between px-4 py-3 mb-3 rounded-xl"
-            style={{ backgroundColor: colors.priceBg }}
-          >
-            <span className="text-lg font-semibold text-gray-700">
-              {isOfferStudent ? `Matière/ ${offer.monthlyPeriod} mois` : `${offer.monthlyPeriod} mois`}
+        {/* Duration Info */}
+        <div 
+          className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 mb-3 sm:mb-5 rounded-xl sm:rounded-2xl border-2 transition-colors"
+          style={{ 
+            backgroundColor: `${colors.priceBg}80`,
+            borderColor: `${colors.border}30`
+          }}
+        >
+          <div className="flex items-center">
+            <div 
+              className="w-2 h-2 sm:w-3 sm:h-3 rounded-full mr-2 sm:mr-3"
+              style={{ backgroundColor: colors.check }}
+            ></div>
+            <span className="text-sm sm:text-base font-semibold text-gray-700">
+              {isOfferStudent ? `Par matière` : `Durée`}
             </span>
-            <div className="flex items-baseline">
-              <span 
-                className="text-4xl font-bold"
-                style={{ color: colors.price }}
-              >
-                {offer.price}
-              </span>
-              <span 
-                className="ml-1 text-xl font-medium"
-                style={{ color: colors.price }}
-              >
-                DT
-              </span>
-            </div>
           </div>
-          
-          {isFreeOffer && (
-            <div className="py-2 mb-4 text-center text-blue-800 bg-blue-100 rounded-lg">
-              Offre 100% gratuite - Aucun paiement requis
-            </div>
-          )}
+          <span 
+            className="text-base sm:text-lg font-bold"
+            style={{ color: colors.price }}
+          >
+            {offer.monthlyPeriod} mois
+          </span>
         </div>
 
-        <div className="flex-grow mb-6">
-          <h3 className="mb-3 text-lg font-semibold text-gray-800">
-            Ce que vous obtenez
+        {/* Benefits Section */}
+        <div className="flex-grow mb-4 sm:mb-6">
+          <h3 className="mb-3 sm:mb-4 text-base sm:text-lg font-bold text-gray-800 flex items-center">
+            <div 
+              className="w-1 h-4 sm:h-6 rounded-full mr-2 sm:mr-3"
+              style={{ backgroundColor: colors.check }}
+            ></div>
+            Avantages inclus
           </h3>
           
-          <div className="h-48 pr-2 space-y-3 overflow-y-auto">
+          <div className="space-y-2 sm:space-y-3 max-h-32 sm:max-h-40 overflow-y-auto pr-1 sm:pr-2 custom-scrollbar">
             {benefitsArray.map((benefit: any, index: React.Key) => (
               <div 
-                className="flex items-start"
+                className="flex items-start p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
                 key={index}
               >
-                <CheckCircleIcon 
-                  style={{ color: colors.check }} 
-                  className="flex-shrink-0 mt-1 mr-3" 
-                />
-                <p className="text-gray-700">{benefit}</p>
+                <div 
+                  className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center mt-0.5 mr-2 sm:mr-3"
+                  style={{ backgroundColor: `${colors.check}20` }}
+                >
+                  <CheckCircleIcon 
+                    style={{ color: colors.check, fontSize: window.innerWidth < 640 ? '12px' : '16px' }} 
+                  />
+                </div>
+                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{benefit}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="pt-4 mt-auto">
+        {/* Action Button */}
+        <div className="mt-auto">
           {(!offer.subscribed && role !== "ROLE_ADMIN") && (
             <div
-              className="w-full py-3 font-semibold text-center text-white transition-all shadow-md cursor-pointer rounded-xl hover:shadow-lg"
+              className="relative w-full py-3 sm:py-4 font-bold text-center text-white transition-all duration-300 cursor-pointer rounded-xl sm:rounded-2xl hover:shadow-xl transform hover:scale-105 active:scale-95 overflow-hidden"
               style={{
-                background: `linear-gradient(to right, ${colors.buttonStart}, ${colors.buttonEnd})`,
-                backgroundSize: '200% auto',
-                transition: 'background-position 0.5s',
+                background: `linear-gradient(135deg, ${colors.buttonStart}, ${colors.buttonEnd})`,
               }}
               onMouseEnter={(e: MouseEvent<HTMLDivElement>) => {
-                e.currentTarget.style.background = `linear-gradient(to right, ${colors.buttonHoverStart}, ${colors.buttonHoverEnd})`;
+                e.currentTarget.style.background = `linear-gradient(135deg, ${colors.buttonHoverStart}, ${colors.buttonHoverEnd})`;
               }}
               onMouseLeave={(e: MouseEvent<HTMLDivElement>) => {
-                e.currentTarget.style.background = `linear-gradient(to right, ${colors.buttonStart}, ${colors.buttonEnd})`;
+                e.currentTarget.style.background = `linear-gradient(135deg, ${colors.buttonStart}, ${colors.buttonEnd})`;
               }}
               onClick={onclick}
             >
-              {isFreeOffer ? "Rejoindre gratuitement" : "Souscrire maintenant"}
+              {/* Button shine effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              
+              <span className="relative z-10 flex items-center justify-center text-sm sm:text-base">
+                {isFreeOffer ? (
+                  <>
+                    <span className="hidden sm:inline">🎯 Rejoindre gratuitement</span>
+                    <span className="sm:hidden">🎯 Rejoindre</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="hidden sm:inline">💎 Souscrire maintenant</span>
+                    <span className="sm:hidden">💎 Souscrire</span>
+                  </>
+                )}
+              </span>
             </div>
           )}
         </div>
       </div>
 
+      {/* Decorative elements */}
+      <div 
+        className="absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-5"
+        style={{ backgroundColor: colors.border }}
+      ></div>
+      <div 
+        className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full opacity-5"
+        style={{ backgroundColor: colors.check }}
+      ></div>
+
+      {/* Modals */}
       {isOfferStudent ? (
         <OfferStudentModal
           open={isModalOpen}
@@ -340,6 +406,7 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
         />
       )}
       
+      {/* Delete Confirmation Dialog */}
       <Dialog
         open={open}
         keepMounted

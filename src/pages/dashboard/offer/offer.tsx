@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
-  Grid,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -8,15 +7,11 @@ import {
   Button,
   Typography,
   Card,
-  ToggleButton,
-  ToggleButtonGroup,
+
 } from "@mui/material";
-import Carousel from "react-material-ui-carousel";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import AddIcon from "@mui/icons-material/Add";
 // import CreditCardIcon from "@mui/icons-material/CreditCard"; // Not used - online payment disabled
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+
 import OfferCard from "../../../componet/offer-card";
 import FormModal from "../../../componet/offerModal";
 import PersonIcon from "@mui/icons-material/Person";
@@ -35,9 +30,7 @@ const Offer = () => {
   const role = useSelector(
     (state: RootState) => state?.user?.userData?.role.name,
   );
-  const teacherId = useSelector(
-    (state: RootState) => state?.user?.userData?.id || ""
-  );
+
   const snackbarContext = useContext(SnackbarContext);
 
   const [data, setData] = useState<any>([]);
@@ -155,17 +148,7 @@ const Offer = () => {
     }
   }; */
 
-  const groupedSrcList: any[] = data.reduce(
-    (result: any, src: any, index: number) => {
-      const pairIndex = Math.floor(index / 2);
-      if (!result[pairIndex]) {
-        result[pairIndex] = [];
-      }
-      result[pairIndex].push(src);
-      return result;
-    },
-    [],
-  );
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
@@ -253,32 +236,33 @@ const Offer = () => {
     // }  // Closing the commented online payment condition
   };
   return (
-    <div
-      className={`flex flex-col  lg:flex-row items-center w-full ${
-        data.length === 0 ? "justify-center h-[60vh]" : ""
-      }`}
-    >
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+      <div
+        className={`flex flex-col lg:flex-row items-start gap-8 w-full px-4 py-6 ${
+          data.length === 0 ? "justify-center items-center h-[60vh]" : ""
+        }`}
+      >
       {isConfirmModal ? (
         selectedOffer && selectedOffer.price === 0 ? (
           // Free offer modal
-          <div className="w-full h-[40vh] flex flex-col items-center justify-center">
-            <div className="w-9/12 mb-10">
-              <h1 className="text-lg text-title lg:text-3xl font-montserrat_semi_bold">
+          <div className="w-full min-h-[40vh] flex flex-col items-center justify-center px-4">
+            <div className="w-full max-w-2xl mb-6 sm:mb-10">
+              <h1 className="text-xl text-center sm:text-2xl lg:text-3xl text-title font-montserrat_semi_bold">
                 Offre gratuite
               </h1>
             </div>
-            <div className="flex flex-col items-center w-3/4 p-5 bg-white sm:w-1/2 rounded-3xl">
-              <h1 className="mb-5 text-lg font-montserrat_semi_bold lg:text-3xl text-title">
+            <div className="flex flex-col items-center w-full max-w-lg p-4 bg-white shadow-lg sm:p-6 rounded-2xl sm:rounded-3xl">
+              <h1 className="mb-4 text-base leading-relaxed text-center sm:mb-6 sm:text-lg lg:text-xl font-montserrat_semi_bold text-title">
                 Vous allez rejoindre cette offre gratuitement !
               </h1>
-              <div className="flex flex-col justify-between w-full sm:flex-row">
+              <div className="flex flex-col w-full gap-3 sm:flex-row sm:justify-between">
                 <CustomButton
-                  className="w-full h-10 mb-4 bg-white border rounded-md border-primary text-primary sm:mb-0 sm:w-1/3"
+                  className="order-2 w-full px-6 py-3 font-medium bg-white border rounded-lg sm:w-auto border-primary text-primary sm:order-1"
                   text={"Précédent"}
                   onClick={handleBackToMainView}
                 />
                 <CustomButton
-                  className="w-full h-10 text-white rounded-md bg-primary sm:w-1/3"
+                  className="order-1 w-full px-6 py-3 font-medium text-white rounded-lg sm:w-auto bg-primary sm:order-2"
                   text={"Confirmer"}
                   onClick={handleConfirmPayment}
                 />
@@ -287,14 +271,14 @@ const Offer = () => {
           </div>
         ) : (
           // Paid offer modal
-          <div className="w-full h-[70vh] flex flex-col items-center">
-            <div className="w-9/12 mb-10">
-              <h1 className="text-lg text-title lg:text-3xl font-montserrat_semi_bold">
+          <div className="w-full min-h-[70vh] flex flex-col items-center px-4">
+            <div className="w-full max-w-2xl mb-6 sm:mb-10">
+              <h1 className="text-xl text-center sm:text-2xl lg:text-3xl text-title font-montserrat_semi_bold">
                 Confirmer offre
               </h1>
             </div>
-            <div className="flex flex-col items-center w-3/4 p-5 bg-white sm:w-1/2 rounded-3xl">
-              <h1 className="mb-5 text-lg font-montserrat_semi_bold lg:text-3xl text-title">
+            <div className="flex flex-col items-center w-full max-w-lg p-4 bg-white shadow-lg sm:p-6 rounded-2xl sm:rounded-3xl">
+              <h1 className="mb-4 text-base text-center sm:mb-6 sm:text-lg lg:text-xl font-montserrat_semi_bold text-title">
                 Confirmer le Paiement
               </h1>
               
@@ -334,11 +318,11 @@ const Offer = () => {
               */}
 
               {/* Online payment method disabled - only upload available */}
-              <p className="mb-5 text-sm font-montserrat_regular text-text">
+              <p className="px-2 mb-4 text-xs text-center text-gray-600 sm:mb-6 sm:text-sm font-montserrat_regular">
                 Veuillez fournir une image claire du reçu de paiement
               </p>
                   <Card
-                    className="flex flex-col items-center justify-center w-full p-6 mb-5 border-2 border-dashed cursor-pointer border-primary"
+                    className="flex flex-col items-center justify-center w-full p-4 mb-4 transition-colors border-2 border-dashed cursor-pointer sm:p-6 sm:mb-6 border-primary hover:border-primary/70"
                     onClick={handleCardClick}
                   >
                     <input
@@ -348,20 +332,29 @@ const Offer = () => {
                       className="hidden"
                       onChange={handleFileChange}
                     />
-                    <AddIcon className="mb-2 text-6xl text-primary" />
-                    <Typography className="text-primary font-montserrat_semi_bold">
-                      {selectedFile ? selectedFile.name : "Ajouter le reçu"}
+                    <AddIcon className="mb-2 text-4xl sm:text-6xl text-primary" />
+                    <Typography className="text-sm text-center text-primary font-montserrat_semi_bold sm:text-base">
+                      {selectedFile ? (
+                        <span className="break-all">{selectedFile.name}</span>
+                      ) : (
+                        "Ajouter le reçu"
+                      )}
                     </Typography>
+                    {selectedFile && (
+                      <Typography className="mt-1 text-xs text-gray-500">
+                        ✓ Fichier sélectionné
+                      </Typography>
+                    )}
                   </Card>
               
-              <div className="flex flex-col justify-between w-full sm:flex-row">
+              <div className="flex flex-col w-full gap-3 sm:flex-row sm:justify-between">
                 <CustomButton
-                  className="w-full h-10 mb-4 bg-white border rounded-md border-primary text-primary sm:mb-0 sm:w-1/3"
+                  className="order-2 w-full px-6 py-3 font-medium bg-white border rounded-lg sm:w-auto border-primary text-primary sm:order-1"
                   text={"Précédent"}
                   onClick={handleBackToMainView}
                 />
                 <CustomButton
-                  className="w-full h-10 text-white rounded-md bg-primary sm:w-1/3"
+                  className="order-1 w-full px-6 py-3 font-medium text-white rounded-lg sm:w-auto bg-primary sm:order-2"
                   text={'Envoyer'}
                   onClick={handleConfirmPayment}
                 />
@@ -372,57 +365,76 @@ const Offer = () => {
       ) : (
         <>
           {data && data.length > 0 ? (
-            <div className="w-full h-full md:w-8/12">
-              <Carousel
-                navButtonsAlwaysVisible={true}
-                navButtonsProps={{
-                  style: {
-                    backgroundColor: "white",
-                    color: "black",
-                    margin: "0 0px",
-                  },
-                }}
-                NextIcon={<ArrowForwardIosIcon />}
-                PrevIcon={<ArrowBackIosIcon />}
-                animation={"slide"}
-                autoPlay={false}
-                indicators={false}
-              >
-                {groupedSrcList.map((pair, index) => (
-                  <Grid
-                    container
-                    spacing={2}
-                    className="px-5 md:px-16"
-                    key={index}
-                  >
-                    {pair.map(
-                      (src: any, imgIndex: React.Key | null | undefined) => (
-                        <Grid item xs={12} sm={6} key={imgIndex}>
-                          <OfferCard
-                            offer={src}
-                            onclick={() => handleOfferClick(src)}
-                            onUpdateOffer={handleUpdateOffer}
-                            onDeleteOffer={handleUpdateAfterDelete}
-                          />
-                        </Grid>
-                      ),
-                    )}
-                  </Grid>
-                ))}
-              </Carousel>
+            <div className="w-full">
+              <div className="mb-8">
+                <h2 className="mb-2 text-3xl font-bold text-gray-800">Offres Professeurs</h2>
+                <p className="text-gray-600">Rejoignez notre plateforme et partagez votre expertise</p>
+              </div>
+              
+          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
+            {/* Existing Offer Cards */}
+            {data.map((offer: any, index: number) => (
+              <div key={index} className="w-full">
+                <OfferCard
+                  offer={offer}
+                  onclick={() => handleOfferClick(offer)}
+                  onUpdateOffer={handleUpdateOffer}
+                  onDeleteOffer={handleUpdateAfterDelete}
+                />
+              </div>
+            ))}                {/* Add Offer Card for Admin - Always at the end */}
+                  {role === "ROLE_ADMIN" && (
+                    <div className="w-full">
+                        <div
+                          onClick={handleOpenModal}
+                          className="flex flex-col items-center justify-center w-full transition-all duration-300 bg-white border-2 border-gray-300 border-dashed cursor-pointer group h-80 rounded-2xl hover:shadow-xl hover:-translate-y-1 hover:border-blue-400"
+                        >
+                        <div className="flex flex-col items-center text-gray-500 transition-colors duration-300 group-hover:text-blue-500">
+                          <div className="p-4 mb-4 transition-colors duration-300 bg-gray-100 rounded-full sm:p-6 group-hover:bg-blue-100 sm:mb-6">
+                            <AddIcon style={{ fontSize: window.innerWidth < 640 ? 36 : 48 }} />
+                          </div>
+                          <h3 className="mb-2 text-lg font-semibold text-center sm:text-xl sm:mb-3">Ajouter une Offre</h3>
+                          <p className="px-4 text-xs text-center text-gray-400 transition-colors duration-300 sm:text-sm sm:px-6 group-hover:text-blue-400">
+                            Cliquez ici pour créer une nouvelle offre professeur
+                          </p>
+                        </div>
+                        </div>
+                    </div>
+                  )}
+              </div>
+              
+              {data.length > 4 && (
+                <div className="flex justify-center mt-8">
+                  <button className="px-6 py-3 font-semibold text-white transition-colors rounded-full bg-primary hover:bg-primary-dark">
+                    Voir plus d'offres
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
-            <div></div>
-          )}
-
-          {role === "ROLE_ADMIN" && (
-            <div className="flex justify-center w-full mt-5 item-center md:w-1/3 md:mt-0">
-              <div
-                onClick={handleOpenModal}
-                className="p-5 rounded-full cursor-pointer bg-primary"
-              >
-                <AddIcon className="text-white" style={{ fontSize: 50 }} />
-              </div>
+            <div className="flex flex-col items-center justify-center h-64 text-gray-500">
+              <div className="mb-4 text-6xl">🎓</div>
+              <h3 className="mb-2 text-xl font-semibold">Aucune offre disponible</h3>
+              <p>Les nouvelles offres pour enseignants apparaîtront ici bientôt.</p>
+              {/* Add Offer Card for Admin when no offers exist */}
+              {role === "ROLE_ADMIN" && (
+                <div className="mt-6 sm:mt-8">
+                  <div
+                    onClick={handleOpenModal}
+                    className="flex flex-col items-center justify-center w-full h-40 max-w-sm mx-auto transition-all duration-300 bg-white border-2 border-gray-300 border-dashed cursor-pointer group sm:h-48 rounded-2xl hover:shadow-xl hover:-translate-y-1 hover:border-blue-400"
+                  >
+                    <div className="flex flex-col items-center px-4 text-gray-500 transition-colors duration-300 group-hover:text-blue-500">
+                      <div className="p-3 mb-3 transition-colors duration-300 bg-gray-100 rounded-full sm:p-4 group-hover:bg-blue-100 sm:mb-4">
+                        <AddIcon style={{ fontSize: window.innerWidth < 640 ? 28 : 36 }} />
+                      </div>
+                      <h3 className="mb-1 text-base font-semibold text-center sm:text-lg sm:mb-2">Ajouter une Offre</h3>
+                      <p className="text-xs text-center text-gray-400 transition-colors duration-300 sm:text-sm group-hover:text-blue-400">
+                        Créez votre première offre
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </>
@@ -480,6 +492,7 @@ const Offer = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      </div>
     </div>
   );
 };

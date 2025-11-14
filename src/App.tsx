@@ -65,7 +65,10 @@ function App() {
             <Route path="/subject/:id?" element={<Subject />} />
             <Route path="/subject-Details" element={<SubjectDetails />} />
             <Route path="/home" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />}>
+          </Route>
+          
+          {/* Dashboard routes without Layout wrapper to avoid header conflicts */}
+          <Route path="/dashboard" element={<Dashboard />}>
               <Route path="advertisement" element={<Advertisement />} />
               <Route path="calender" element={<Calender />} />
               <Route path="chat" element={<Chat />} />
@@ -87,9 +90,7 @@ function App() {
               } />
               <Route path="stats" element={<Stats />} />
               <Route path="updateprofil" element={<ProfilePage />} />
-
             </Route>
-          </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/register-student" element={<Register />} />
           <Route path="/register" element={<RegisterTeacher />} />

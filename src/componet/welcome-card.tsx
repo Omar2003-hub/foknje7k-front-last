@@ -3,8 +3,8 @@ import { HomeBooks } from "../assets/images";
 
 const WelcomeCard = () => {
   return (
-    <div className="mt-10 w-full h-16 bg-[#67df7f] rounded-3xl text-center  md:text-left flex items-center justify-around">
-      <h1 className="w-86 text-title text-2xl font-montserrat_semi_bold">
+    <div className="mt-10 w-full h-16 bg-gradient-to-r from-[#09745f] to-[#07b98e] text-white rounded-3xl text-center md:text-left flex items-center justify-around">
+      <h1 className="text-2xl w-86 text-title font-montserrat_semi_bold">
         Bienvenu à FOK NJE7EK
       </h1>
       {
@@ -12,7 +12,7 @@ const WelcomeCard = () => {
           <img
           alt={"home Book"}
           src={HomeBooks}
-          className="h-16 w-40 object-cover"
+          className="object-cover w-40 h-16"
         />
         )
       }
