@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Logo } from "../../assets/images";
 import CustomButton from "../custom-button/custom-button";
 import { RootState } from "../../redux/store/store";
@@ -150,7 +150,7 @@ const Header: React.FC = () => {
     <header
      className={`z-20 h-[80px] bg-text bg-opacity-5 backdrop-blur-sm p-4 flex justify-between items-center fixed top-0 transition-all duration-500 ease-out ${
         showHeader ? "translate-y-0" : "-translate-y-full"
-      } shadow-md ${isDashboardRoute ? (sidebarExpanded ? "left-72 right-0" : "left-20 right-0") : "left-0 right-0"}`}
+      } shadow-md ${isDashboardRoute ? (sidebarExpanded ? "left-72 right-0" : "left-20 right-0") : "left-0 right-0 w-full"}`}
     >
       {/* Logo - Show only when not logged in */}
       {!isLogged && (
@@ -163,17 +163,6 @@ const Header: React.FC = () => {
           className="h-12 pl-5 cursor-pointer logo-navv lg:h-16 lg:pl-20"
         />
       )}
-
-      {/* Mobile Menu Toggle - hidden on mobile, visible on desktop */}
-      <div className="items-center hidden lg:flex">
-        <button onClick={toggleMobileMenu} className="z-30">
-          {isMobileMenuOpen ? (
-            <CloseIcon className="mr-5 text-3xl text-title" />
-          ) : (
-            <MenuIcon className="mr-5 text-3xl text-title" />
-          )}
-        </button>
-      </div>
 
       {/* Mobile Menu */}
       <nav

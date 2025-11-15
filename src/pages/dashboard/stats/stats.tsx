@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { getStatsFromIDB, setStatsToIDB } from '../../../utils/idbStats';
 import { BoxStat, MontantStat, TotalStat, UserStat } from "../../../assets/svg";
 import { getStatService } from "../../../services/playList-service";
-import DashboardLayout from "../../../shared/layout/DashboardLayout";
 import "./stats.css";
 
 const MiniStat: React.FC<{
@@ -33,7 +32,7 @@ const Stats: React.FC = () => {
   const CACHE_MAX_AGE = 10 * 60 * 1000; // 10 minutes
   const [loading, setLoading] = useState(false);
 
-  const fetchStats = async (forceRefresh = false) => {
+  const fetchStats = React.useCallback(async (forceRefresh = false) => {
     try {
       setLoading(true);
       const cached = await getStatsFromIDB('stats');
@@ -53,15 +52,14 @@ const Stats: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [CACHE_MAX_AGE]);
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [fetchStats]);
 
   return (
-    <DashboardLayout>
-      <div className="p-6">
+    <div className="p-6">
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Statistiques</h1>
@@ -127,8 +125,7 @@ const Stats: React.FC = () => {
           </div>
         </div>
       </div>
-      </div>
-    </DashboardLayout>
+    </div>
   );
 };
 
