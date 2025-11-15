@@ -23,7 +23,7 @@ class NetworkService {
 
   private constructor() {
     this.axiosInstance = axios.create({
-      baseURL: "http://localhost:8081/api/v1/",
+      baseURL: "https://foknje7ek.com:8081/api/v1/",
     });
 
     // Initialize Snackbar Context
