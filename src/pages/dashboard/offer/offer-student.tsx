@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
+import { Logo } from "../../../assets/images";
 import { RootState } from "../../../redux/store/store";
 import {
   Button,
@@ -41,6 +42,7 @@ const OfferStudent = () => {
   );
 
   const [data, setData] = useState<any>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
   const [selectedOffer, setSelectedOffer] = useState<any>(null);
@@ -57,12 +59,16 @@ const OfferStudent = () => {
   const snackbarContext = useContext(SnackbarContext);
 
   const fetchData = () => {
+    setLoading(true);
     getAllStudentOfferService()
       .then((res) => {
         setData(res.data);
       })
       .catch((e) => {
         console.log(e);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -80,7 +86,6 @@ const OfferStudent = () => {
 
   useEffect(() => {
     fetchData();
-    
     if (role === "ROLE_STUDENT") {
       getAllUserByRole("ROLE_SUPER_TEACHER")
         .then((res) => {
@@ -315,7 +320,7 @@ const OfferStudent = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div
         className={`flex flex-col lg:flex-row items-start gap-8 w-full px-4 py-6 ${
-          data.length === 0 ? "justify-center items-center h-[60vh]" : ""
+          loading ? "justify-center items-center h-[60vh]" : data.length === 0 ? "justify-center items-center h-[60vh]" : ""
         }`}
       >
       {/* Popup de sélection des matières */}
@@ -343,7 +348,7 @@ const OfferStudent = () => {
               Choisissez les matières que vous souhaitez étudier
             </Typography>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
               {availableSubjects.length > 0 ? (
                 availableSubjects.map((subject) => (
                   <div 
@@ -357,19 +362,19 @@ const OfferStudent = () => {
                   >
                     <div className="flex flex-col flex-1">
                       <div className="flex items-center justify-between sm:justify-start">
-                        <span className="font-montserrat_medium text-sm sm:text-base">{subject.speciality}</span>
+                        <span className="text-sm font-montserrat_medium sm:text-base">{subject.speciality}</span>
                         {selectedSubjects.includes(subject.id) && (
                           <CheckCircleOutlineIcon className="text-primary sm:hidden" />
                         )}
                       </div>
-                      <span className="text-xs sm:text-sm text-gray-500">Niveau {subject.level}</span>
+                      <span className="text-xs text-gray-500 sm:text-sm">Niveau {subject.level}</span>
                       <span className="text-xs text-gray-400 truncate">Par {subject.superTeacherFullName}</span>
-                      <span className="text-sm sm:text-base font-semibold text-primary mt-1">
+                      <span className="mt-1 text-sm font-semibold sm:text-base text-primary">
                         {selectedOffer?.price || 0} DT par matière
                       </span>
                     </div>
                     {selectedSubjects.includes(subject.id) && (
-                      <CheckCircleOutlineIcon className="text-primary hidden sm:block ml-2" />
+                      <CheckCircleOutlineIcon className="hidden ml-2 text-primary sm:block" />
                     )}
                   </div>
                 ))
@@ -423,30 +428,30 @@ const OfferStudent = () => {
             
             <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2">
               <div className="order-2 lg:order-1">
-                <Typography className="font-montserrat_medium text-sm sm:text-base">
+                <Typography className="text-sm font-montserrat_medium sm:text-base">
                   Matières sélectionnées:{" "}
                   <span className="font-bold">
                     {selectedSubjects.length} matière(s)
                   </span>
                 </Typography>
-                <Typography className="font-montserrat_medium text-sm sm:text-base mt-2">
+                <Typography className="mt-2 text-sm font-montserrat_medium sm:text-base">
                   Prix détaillé:
                 </Typography>
-                <div className="ml-2 sm:ml-4 text-xs sm:text-sm mt-1">
+                <div className="mt-1 ml-2 text-xs sm:ml-4 sm:text-sm">
                   {selectedSubjects.map(subjectId => {
                     const subject = availableSubjects.find(s => s.id === subjectId);
                     return (
                       <div key={subjectId} className="flex justify-between py-1 border-b border-gray-100 last:border-b-0">
-                        <span className="truncate mr-2">{subject?.speciality || 'Matière'}</span>
+                        <span className="mr-2 truncate">{subject?.speciality || 'Matière'}</span>
                         <span className="font-medium">{selectedOffer?.price || 0} DT</span>
                       </div>
                     );
                   })}
                 </div>
-                <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-primary/5 rounded-lg border border-primary/20">
+                <div className="p-3 mt-3 border rounded-lg bg-gradient-to-r from-blue-50 to-primary/5 border-primary/20">
                   <Typography className="text-base sm:text-lg font-montserrat_semi_bold">
                     Total:{" "}
-                    <span className="text-primary text-lg sm:text-xl">
+                    <span className="text-lg text-primary sm:text-xl">
                       {calculateTotalPrice()} DT
                     </span>
                   </Typography>
@@ -455,19 +460,19 @@ const OfferStudent = () => {
               
               <div className="order-1 lg:order-2">
                 {/* Online payment method disabled - only upload available */}
-                <label className="block mb-3 font-montserrat_medium text-sm sm:text-base">
+                <label className="block mb-3 text-sm font-montserrat_medium sm:text-base">
                   Téléverser le reçu de paiement
                 </label>
                     <div 
-                      className="flex flex-col items-center justify-center w-full h-28 sm:h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
+                      className="flex flex-col items-center justify-center w-full transition-colors border-2 border-gray-300 border-dashed rounded-lg cursor-pointer h-28 sm:h-32 bg-gray-50 hover:bg-gray-100"
                       onClick={() => document.getElementById('payment-file-input')?.click()}
                     >
                       <div className="flex flex-col items-center justify-center px-4">
-                        <CloudUploadIcon className="w-6 h-6 sm:w-8 sm:h-8 mb-2 text-gray-500" />
-                        <p className="mb-1 sm:mb-2 text-xs sm:text-sm text-gray-500 text-center">
+                        <CloudUploadIcon className="w-6 h-6 mb-2 text-gray-500 sm:w-8 sm:h-8" />
+                        <p className="mb-1 text-xs text-center text-gray-500 sm:mb-2 sm:text-sm">
                           <span className="font-semibold">Cliquez pour téléverser</span>
                         </p>
-                        <p className="text-xs text-gray-500 text-center">
+                        <p className="text-xs text-center text-gray-500">
                           JPG, PNG ou PDF (MAX. 5MB)
                         </p>
                       </div>
@@ -480,8 +485,8 @@ const OfferStudent = () => {
                       />
                     </div>
                     {paymentFile && (
-                      <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="text-xs sm:text-sm text-green-700 font-medium truncate">
+                      <div className="p-2 mt-3 border border-green-200 rounded-lg bg-green-50">
+                        <p className="text-xs font-medium text-green-700 truncate sm:text-sm">
                           ✓ Fichier sélectionné: {paymentFile.name}
                         </p>
                       </div>
@@ -490,11 +495,11 @@ const OfferStudent = () => {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
+          <div className="flex flex-col justify-end space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
             <Button
               variant="outlined"
               onClick={handleCloseSubjectModal}
-              className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2 text-sm sm:text-base text-gray-700 border-gray-300 rounded-lg font-montserrat_medium order-2 sm:order-1"
+              className="order-2 w-full px-4 py-2 text-sm text-gray-700 border-gray-300 rounded-lg sm:w-auto sm:px-6 sm:py-2 sm:text-base font-montserrat_medium sm:order-1"
             >
               Annuler
             </Button>
@@ -513,7 +518,19 @@ const OfferStudent = () => {
       </Dialog>
 
       {/* Interface principale */}
-      {isConfirmModal && selectedOffer && selectedOffer.price === 0 ? (
+      {loading ? (
+        <div className="flex flex-col items-center justify-center w-full h-[40vh]">
+          <div className="mb-6">
+            <img
+              src={Logo}
+              alt="Logo"
+              className="w-20 h-20 animate-spin"
+              style={{ animationDuration: '1.2s' }}
+            />
+          </div>
+          <h2 className="text-lg font-semibold text-primary">Chargement des offres...</h2>
+        </div>
+      ) : isConfirmModal && selectedOffer && selectedOffer.price === 0 ? (
         <div className="w-full h-[40vh] flex flex-col items-center justify-center">
           <div className="w-9/12 mb-10">
             <h1 className="text-lg text-title lg:text-3xl font-montserrat_semi_bold">
@@ -567,7 +584,7 @@ const OfferStudent = () => {
                 <p className="text-gray-600">Découvrez nos offres d'apprentissage adaptées à vos besoins</p>
               </div>
               
-              <div className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
                 {/* Existing Offer Cards */}
                 {data.map((offer: any, index: number) => (
                   <div key={index} className="w-full">
@@ -588,11 +605,11 @@ const OfferStudent = () => {
                       className="flex flex-col items-center justify-center w-full transition-all duration-300 bg-white border-2 border-gray-300 border-dashed cursor-pointer group h-80 rounded-2xl hover:shadow-xl hover:-translate-y-1 hover:border-purple-400"
                     >
                       <div className="flex flex-col items-center text-gray-500 transition-colors duration-300 group-hover:text-purple-500">
-                        <div className="p-4 sm:p-6 mb-4 sm:mb-6 transition-colors duration-300 bg-gray-100 rounded-full group-hover:bg-purple-100">
+                        <div className="p-4 mb-4 transition-colors duration-300 bg-gray-100 rounded-full sm:p-6 sm:mb-6 group-hover:bg-purple-100">
                           <AddIcon style={{ fontSize: window.innerWidth < 640 ? 36 : 48 }} />
                         </div>
-                        <h3 className="mb-2 sm:mb-3 text-lg sm:text-xl font-semibold text-center">Ajouter une Offre</h3>
-                        <p className="px-4 sm:px-6 text-xs sm:text-sm text-center text-gray-400 transition-colors duration-300 group-hover:text-purple-400">
+                        <h3 className="mb-2 text-lg font-semibold text-center sm:mb-3 sm:text-xl">Ajouter une Offre</h3>
+                        <p className="px-4 text-xs text-center text-gray-400 transition-colors duration-300 sm:px-6 sm:text-sm group-hover:text-purple-400">
                           Cliquez ici pour créer une nouvelle offre étudiant
                         </p>
                       </div>
@@ -628,71 +645,6 @@ const OfferStudent = () => {
               )}
             </div>
           )}
-          {/* {role === "ROLE_STUDENT" && (
-            <div className="flex flex-col overflow-hidden border shadow-xl w-80 lg:w-96 bg-white/80 backdrop-blur-md rounded-3xl border-white/20">
-              <div className="p-6 text-white bg-gradient-to-r from-blue-500 to-purple-600">
-                <h1 className="mb-2 text-2xl font-bold">
-                  🎓 Professeurs Experts
-                </h1>
-                <p className="text-sm text-blue-100">
-                  Découvrez notre équipe d'enseignants qualifiés
-                </p>
-              </div>
-              
-              <div className="p-6">
-                <div className="relative mb-6">
-                  <input
-                    type="text"
-                    placeholder="Rechercher un professeur..."
-                    value={filterText}
-                    onChange={(e) => setFilterText(e.target.value)}
-                    className="w-full p-4 pl-12 transition-all duration-300 border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 bg-gray-50 focus:bg-white"
-                  />
-                  <div className="absolute text-gray-400 transform -translate-y-1/2 left-4 top-1/2">
-                    🔍
-                  </div>
-                </div>
-                
-                <div className="space-y-4 overflow-y-auto max-h-96 custom-scrollbar">
-                  {filteredTeachers.length > 0 ? (
-                    filteredTeachers.map((item, index) => (
-                      <div
-                        key={index.toString()}
-                        className="flex items-center justify-between p-4 transition-all duration-300 border border-gray-200 group rounded-2xl bg-gradient-to-r from-gray-50 to-gray-100 hover:from-blue-50 hover:to-purple-50 hover:border-blue-300 hover:shadow-md"
-                      >
-                        <div className="flex items-center flex-1">
-                          <div className="flex items-center justify-center w-12 h-12 mr-4 font-bold text-white rounded-full shadow-lg bg-gradient-to-br from-blue-500 to-purple-600">
-                            {item.fullName.charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <p className="text-lg font-bold text-gray-800 transition-colors group-hover:text-blue-600">
-                              {item.fullName}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              Professeur Expert
-                            </p>
-                          </div>
-                        </div>
-                        <div
-                          className="p-3 transition-all duration-300 bg-white border border-gray-200 rounded-full shadow-md cursor-pointer hover:shadow-lg hover:scale-110 hover:border-blue-300"
-                          onClick={() => handleOpenProfileDialog(item)}
-                        >
-                          <VisibilityIcon className="text-blue-500" />
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="py-8 text-center">
-                      <div className="mb-4 text-4xl">👨‍🏫</div>
-                      <p className="text-gray-500">
-                        {filterText ? "Aucun professeur trouvé" : "Chargement des professeurs..."}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )} */}
         </>
       )}
 
