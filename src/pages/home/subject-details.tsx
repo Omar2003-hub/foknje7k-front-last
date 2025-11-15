@@ -699,7 +699,10 @@ const SubjectDetails = () => {
                       
                       {/* Play overlay for videos */}
                       {activeStatus === "videos" && (
-                        <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 opacity-0 group-hover:opacity-100 bg-black/10 rounded-xl">
+                        <div
+                          className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 opacity-0 group-hover:opacity-100 bg-black/10 rounded-xl"
+                          style={{ pointerEvents: 'none' }}
+                        >
                           <div className="p-3 bg-white rounded-full shadow-lg">
                             <OndemandVideoIcon className="text-[#09745f]" sx={{ fontSize: 32 }} />
                           </div>
