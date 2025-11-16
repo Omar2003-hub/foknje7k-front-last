@@ -26,7 +26,9 @@ import {
   faSignOutAlt,
   faSquareCaretDown
 } from "@fortawesome/free-solid-svg-icons";
-import { faFacebook, faYoutube, faInstagram } from '@fortawesome/free-brands-svg-icons';
+import {
+  faWhatsapp
+} from "@fortawesome/free-brands-svg-icons";
 
 // CONTEXT
 const SidebarContext = createContext<{ expanded: boolean }>({ expanded: true });
@@ -378,16 +380,12 @@ const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
           </SidebarContext.Provider>
 
           {/* Social Icons */}
-          <div className="flex justify-center gap-6 py-4 bg-transparent border-t border-gray-200">
-            <a href="https://www.facebook.com/people/%D9%81%D9%83-%D9%86%D8%AC%D8%A7%D8%AD%D9%83/100069589923551/" target="_blank" rel="noopener noreferrer">
-              <FontAwesomeIcon icon={faFacebook} className="w-6 h-6 text-[#09745f] hover:text-blue-600 transition" />
+          <div className="flex flex-col items-center gap-2 py-4 bg-transparent border-t border-gray-200">
+            <a href="https://wa.me/21651347528" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faWhatsapp} className="w-7 h-7 text-[#09745f] hover:text-green-500 transition" />
+              <span className="text-base font-medium text-gray-700">+216 51 347 528</span>
             </a>
-            <a href="https://www.youtube.com/@foknje7ik" target="_blank" rel="noopener noreferrer">
-              <FontAwesomeIcon icon={faYoutube} className="w-6 h-6 text-[#09745f] hover:text-red-600 transition" />
-            </a>
-            <a href="https://www.instagram.com/fok_nje7ik/" target="_blank" rel="noopener noreferrer">
-              <FontAwesomeIcon icon={faInstagram} className="w-6 h-6 text-[#09745f] hover:text-pink-500 transition" />
-            </a>
+            <p className="text-sm text-gray-600">Contactez-nous pour support.</p>
           </div>
         </nav>
       </aside>
@@ -537,15 +535,11 @@ const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
 
           {/* Mobile Social Icons - Same as PC */}
           <div className="flex justify-center gap-6 py-4 bg-transparent border-t border-gray-200">
-            <a href="https://www.facebook.com/people/%D9%81%D9%83-%D9%86%D8%AC%D8%A7%D8%AD%D9%83/100069589923551/" target="_blank" rel="noopener noreferrer">
-              <FontAwesomeIcon icon={faFacebook} className="w-6 h-6 text-[#09745f] hover:text-blue-600 transition" />
+            <a href="https://wa.me/21651347528" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faWhatsapp} className="w-7 h-7 text-[#09745f] hover:text-green-500 transition" />
+              <span className="text-base font-medium text-gray-700">+216 51 347 528</span>
             </a>
-            <a href="https://www.youtube.com/@foknje7ik" target="_blank" rel="noopener noreferrer">
-              <FontAwesomeIcon icon={faYoutube} className="w-6 h-6 text-[#09745f] hover:text-red-600 transition" />
-            </a>
-            <a href="https://www.instagram.com/fok_nje7ik/" target="_blank" rel="noopener noreferrer">
-              <FontAwesomeIcon icon={faInstagram} className="w-6 h-6 text-[#09745f] hover:text-pink-500 transition" />
-            </a>
+            <p className="text-sm text-gray-600">Contactez-nous pour support.</p>
           </div>
         </div>
       </Drawer>
