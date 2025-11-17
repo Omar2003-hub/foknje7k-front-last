@@ -16,8 +16,10 @@ interface FormData {
   title: string;
   subTitle: string;
   description: string;
-  price: number | string;
-  monthlyPeriod: number;
+  monthlyPrice: number | string;
+  trimesterPrice: number | string;
+  semesterPrice: number | string;
+  yearlyPrice: number | string;
   offerDetails: string;
   classId: number | string;
   requiredEducationLevel?: string;
@@ -28,8 +30,10 @@ const defaultData: FormData = {
   title: "",
   subTitle: "",
   description: "",
-  price: "",
-  monthlyPeriod: 0,
+  monthlyPrice: "",
+  trimesterPrice: "",
+  semesterPrice: "",
+  yearlyPrice: "",
   offerDetails: "",
   classId: "",
   requiredEducationLevel: "",
@@ -217,19 +221,35 @@ const OfferStudentModal: React.FC<FormModalProps> = ({
             onChange={handleChange}
           />
           <CustomInput
-            label="Price"
+            label="Monthly Price"
             inputType="number"
             CustomStyle="mb-5"
-            value={sendeData.price}
-            name="price"
+            value={sendeData.monthlyPrice}
+            name="monthlyPrice"
             onChange={handleChange}
           />
           <CustomInput
-            label="Duration"
+            label="Trimester Price"
             inputType="number"
             CustomStyle="mb-5"
-            value={sendeData.monthlyPeriod}
-            name="monthlyPeriod"
+            value={sendeData.trimesterPrice}
+            name="trimesterPrice"
+            onChange={handleChange}
+          />
+          <CustomInput
+            label="Semester Price"
+            inputType="number"
+            CustomStyle="mb-5"
+            value={sendeData.semesterPrice}
+            name="semesterPrice"
+            onChange={handleChange}
+          />
+          <CustomInput
+            label="Yearly Price"
+            inputType="number"
+            CustomStyle="mb-5"
+            value={sendeData.yearlyPrice}
+            name="yearlyPrice"
             onChange={handleChange}
           />
           <CustomSelect

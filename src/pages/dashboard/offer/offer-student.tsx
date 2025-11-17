@@ -610,7 +610,7 @@ const OfferStudent = () => {
                         </div>
                         <h3 className="mb-2 text-lg font-semibold text-center sm:mb-3 sm:text-xl">Ajouter une Offre</h3>
                         <p className="px-4 text-xs text-center text-gray-400 transition-colors duration-300 sm:px-6 sm:text-sm group-hover:text-purple-400">
-                          Cliquez ici pour créer une nouvelle offre étudiant
+                          Cliquez ici pour créer une nouvelle offre élève
                         </p>
                       </div>
                     </div>

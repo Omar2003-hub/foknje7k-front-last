@@ -51,16 +51,16 @@ interface SidebarProps {
 const sidebarLinks: SidebarLink[] = [
   { path: "/home", name: "Mes Classes", roles: ["ROLE_ADMIN", "ROLE_SUPER_TEACHER", "ROLE_TEACHER", "ROLE_STUDENT"] },
   { path: "/offer-teacher", name: "Offre Professeur", roles: ["ROLE_SUPER_TEACHER", "ROLE_ADMIN"] },
-  { path: "/offer-student", name: "Offre Étudiant", roles: ["ROLE_STUDENT", "ROLE_ADMIN"] },
+  { path: "/offer-student", name: "Offres", roles: ["ROLE_STUDENT", "ROLE_ADMIN"] },
   { path: "/subscription", name: "Abonnement", roles: ["ROLE_SUPER_TEACHER", "ROLE_STUDENT"] },
   { path: "/management-prof", name: "Gestion Professeurs", roles: ["ROLE_ADMIN", "ROLE_SUPER_TEACHER"] },
-  { path: "/management-student", name: "Gestion Étudiants", roles: ["ROLE_ADMIN", "ROLE_SUPER_TEACHER"] },
+  { path: "/management-student", name: "Gestion Élèves", roles: ["ROLE_ADMIN", "ROLE_SUPER_TEACHER"] },
   { path: "/management-users", name: "Gestion des utilisateurs", roles: ["ROLE_ADMIN"] },
   { path: "/files", name: "Fichiers", roles: ["ROLE_ADMIN", "ROLE_SUPER_TEACHER", "ROLE_TEACHER"] },
   { path: "/calender", name: "Calendrier Live", roles: ["ROLE_ADMIN", "ROLE_TEACHER", "ROLE_SUPER_TEACHER", "ROLE_STUDENT"] },
   { path: "/chat", name: "Chat Room", roles: ["ROLE_ADMIN", "ROLE_TEACHER", "ROLE_SUPER_TEACHER", "ROLE_STUDENT"] },
   { path: "/requests-prof", name: "Demandes des Professeurs", roles: ["ROLE_ADMIN"] },
-  { path: "/requests-student", name: "Demandes des Étudiants", roles: ["ROLE_ADMIN"] },
+  { path: "/requests-student", name: "Demandes des Élèves", roles: ["ROLE_ADMIN"] },
   { path: "/stats", name: "Statistiques", roles: ["ROLE_ADMIN"] },
 ];
 

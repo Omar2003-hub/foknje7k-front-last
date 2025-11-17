@@ -12,7 +12,6 @@ import {
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CustomButton from "../shared/custom-button/custom-button";
 import FormModal from "./offerModal";
 import { RootState } from "../redux/store/store";
 import { useSelector } from "react-redux";
@@ -40,7 +39,9 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
   );
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   
-  const isFreeOffer = offer.price === 0;
+  const isFreeOffer =
+    (offer.price === 0) ||
+    ([offer.monthlyPrice, offer.trimesterPrice, offer.semesterPrice, offer.yearlyPrice].every(p => p === 0));
 
   const themeColors = {
     free: {
@@ -170,17 +171,34 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
     }
   };
 
+  const [selectedPeriod, setSelectedPeriod] = useState("monthly");
+
+  const getPriceForPeriod = () => {
+    switch (selectedPeriod) {
+      case "monthly":
+        return offer.monthlyPrice;
+      case "trimester":
+        return offer.trimesterPrice;
+      case "semester":
+        return offer.semesterPrice;
+      case "yearly":
+        return offer.yearlyPrice;
+      default:
+        return offer.monthlyPrice;
+    }
+  };
+
   return (
     <div 
-      className="group relative flex flex-col bg-white shadow-lg rounded-3xl overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 w-full h-full border border-gray-100"
+      className="relative flex flex-col w-full h-full overflow-hidden transition-all duration-500 bg-white border border-gray-100 shadow-lg group rounded-3xl hover:shadow-2xl hover:-translate-y-2"
       style={{ 
         background: `linear-gradient(145deg, ${colors.priceBg}15, #ffffff)`,
         borderTop: `6px solid ${colors.border}`
       }}
     >
       {/* Image Container with Overlay */}
-      <div className="relative w-full h-40 sm:h-48 lg:h-52 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-10"></div>
+      <div className="relative w-full h-40 overflow-hidden sm:h-48 lg:h-52">
+        <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/30 to-transparent"></div>
         <img
           src={offer?.imageUrl || "https://via.placeholder.com/300x208?text=Offre+Moderne"}
           alt={offer.title}
@@ -189,21 +207,21 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
         
         {/* Price Badge - Floating */}
         <div 
-          className="absolute top-2 sm:top-4 left-2 sm:left-4 z-20 px-2 sm:px-4 py-1 sm:py-2 rounded-xl sm:rounded-2xl backdrop-blur-md shadow-lg"
+          className="absolute z-20 px-2 py-1 shadow-lg top-2 sm:top-4 left-2 sm:left-4 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl backdrop-blur-md"
           style={{ 
             background: `linear-gradient(135deg, ${colors.buttonStart}E6, ${colors.buttonEnd}E6)`,
           }}
         >
           <div className="flex items-baseline text-white">
-            <span className="text-lg sm:text-2xl font-bold">{offer.price}</span>
-            <span className="ml-1 text-xs sm:text-sm font-medium">DT</span>
+            <span className="text-lg font-bold sm:text-2xl">{getPriceForPeriod()}</span>
+            <span className="ml-1 text-xs font-medium sm:text-sm">DT</span>
           </div>
         </div>
 
         {/* Subscription Badge */}
         {offer.subscribed && (
           <div 
-            className="absolute top-2 sm:top-4 right-2 sm:right-4 z-20 px-2 sm:px-3 py-1 text-xs font-bold rounded-full backdrop-blur-md shadow-lg"
+            className="absolute z-20 px-2 py-1 text-xs font-bold rounded-full shadow-lg top-2 sm:top-4 right-2 sm:right-4 sm:px-3 backdrop-blur-md"
             style={{ 
               backgroundColor: `${colors.check}E6`,
               color: 'white'
@@ -215,20 +233,20 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
 
         {/* Free Offer Badge */}
         {isFreeOffer && (
-          <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 z-20 px-2 sm:px-3 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold rounded-full shadow-lg animate-pulse">
-            🎉 GRATUIT
+          <div className="absolute z-20 px-2 py-1 text-xs font-bold text-white rounded-full shadow-lg bottom-2 sm:bottom-4 left-2 sm:left-4 sm:px-3 bg-gradient-to-r from-blue-500 to-blue-600 animate-pulse">
+            🎉 مجاني
           </div>
         )}
       </div>
 
       {/* Content Container */}
-      <div className="flex flex-col h-full p-4 sm:p-6 relative">
+      <div className="relative flex flex-col h-full p-4 sm:p-6">
         {/* Header Section */}
         <div className="flex items-start justify-between mb-3 sm:mb-5">
           <div className="flex-1">
             <div className="flex items-center mb-2">
               <h2 
-                className="text-lg sm:text-xl font-bold leading-tight"
+                className="text-lg font-bold leading-tight sm:text-xl"
                 style={{ color: colors.title }}
               >
                 {offer.title}
@@ -237,7 +255,7 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
                 <div className="ml-auto">
                   <IconButton 
                     onClick={handleClick} 
-                    className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                    className="p-2 transition-colors rounded-full hover:bg-gray-100"
                     style={{ color: colors.icon }}
                   >
                     <MoreVertIcon />
@@ -261,8 +279,8 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
                       }
                     }}
                   >
-                    <MenuItem onClick={handleOpenModal} className="rounded-lg mx-1 my-1">Modifier</MenuItem>
-                    <MenuItem onClick={handleClickAlert} className="rounded-lg mx-1 my-1 text-red-600">Supprimer</MenuItem>
+                    <MenuItem onClick={handleOpenModal} className="mx-1 my-1 rounded-lg">Modifier</MenuItem>
+                    <MenuItem onClick={handleClickAlert} className="mx-1 my-1 text-red-600 rounded-lg">Supprimer</MenuItem>
                   </Menu>
                 </div>
               )}
@@ -278,62 +296,62 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
 
         {/* Description */}
         <div className="mb-3 sm:mb-5">
-          <p className="text-xs sm:text-sm text-gray-600 leading-relaxed line-clamp-2 sm:line-clamp-3">
+          <p className="text-xs leading-relaxed text-gray-600 sm:text-sm line-clamp-2 sm:line-clamp-3">
             {offer.description}
           </p>
         </div>
 
         {/* Duration Info */}
-        <div 
-          className="flex items-center justify-between px-3 sm:px-5 py-3 sm:py-4 mb-3 sm:mb-5 rounded-xl sm:rounded-2xl border-2 transition-colors"
-          style={{ 
-            backgroundColor: `${colors.priceBg}80`,
-            borderColor: `${colors.border}30`
-          }}
-        >
-          <div className="flex items-center">
-            <div 
-              className="w-2 h-2 sm:w-3 sm:h-3 rounded-full mr-2 sm:mr-3"
-              style={{ backgroundColor: colors.check }}
-            ></div>
-            <span className="text-sm sm:text-base font-semibold text-gray-700">
-              {isOfferStudent ? `Par matière` : `Durée`}
-            </span>
-          </div>
-          <span 
-            className="text-base sm:text-lg font-bold"
-            style={{ color: colors.price }}
-          >
-            {offer.monthlyPeriod} mois
-          </span>
-        </div>
+                <div className="flex flex-col items-center mb-3 sm:mb-5">
+                    <div className="flex justify-center w-full mb-2">
+                      {[
+                        { key: 'monthly', label: 'شهري', price: offer.monthlyPrice },
+                        { key: 'trimester', label: 'ثلاثي', price: offer.trimesterPrice },
+                        { key: 'semester', label: 'سداسي', price: offer.semesterPrice },
+                        { key: 'yearly', label: 'سنوي', price: offer.yearlyPrice }
+                      ].filter(({ price }) => price > 0).map(({ key, label }) => (
+                        <button
+                          key={key}
+                          className={`flex-1 mx-1 px-3 py-2 text-sm font-bold rounded-lg border transition-all duration-300 ${
+                            selectedPeriod === key
+                              ? `bg-[${themeColors.paid.border}] text-white border-[${themeColors.paid.border}] shadow`
+                              : `bg-white text-[${themeColors.paid.border}] border-[${themeColors.paid.border}] hover:bg-green-50`
+                          }`}
+                          style={{ minWidth: '70px', borderColor: themeColors.paid.border, backgroundColor: selectedPeriod === key ? themeColors.paid.border : 'white', color: selectedPeriod === key ? 'white' : themeColors.paid.border }}
+                          onClick={() => setSelectedPeriod(key)}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                </div>
 
         {/* Benefits Section */}
         <div className="flex-grow mb-4 sm:mb-6">
-          <h3 className="mb-3 sm:mb-4 text-base sm:text-lg font-bold text-gray-800 flex items-center">
+          {/* <h3 className="flex items-center mb-3 text-base font-bold text-gray-800 sm:mb-4 sm:text-lg">
             <div 
-              className="w-1 h-4 sm:h-6 rounded-full mr-2 sm:mr-3"
+              className="w-1 h-4 mr-2 rounded-full sm:h-6 sm:mr-3"
               style={{ backgroundColor: colors.check }}
             ></div>
             Avantages inclus
-          </h3>
+          </h3> */}
           
-          <div className="space-y-2 sm:space-y-3 max-h-32 sm:max-h-40 overflow-y-auto pr-1 sm:pr-2 custom-scrollbar">
+          <div className="pr-1 space-y-2 overflow-y-auto sm:space-y-3 max-h-32 sm:max-h-40 sm:pr-2 custom-scrollbar">
             {benefitsArray.map((benefit: any, index: React.Key) => (
-              <div 
-                className="flex items-start p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors"
-                key={index}
-              >
                 <div 
-                  className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center mt-0.5 mr-2 sm:mr-3"
-                  style={{ backgroundColor: `${colors.check}20` }}
+                  className="flex flex-row-reverse items-start p-2 transition-colors rounded-lg sm:p-3 sm:rounded-xl bg-gray-50 hover:bg-gray-100"
+                  key={index}
                 >
-                  <CheckCircleIcon 
-                    style={{ color: colors.check, fontSize: window.innerWidth < 640 ? '12px' : '16px' }} 
-                  />
+                  <div 
+                    className="flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center mt-0.5 ml-2 sm:ml-3"
+                    style={{ backgroundColor: `${colors.check}20` }}
+                  >
+                    <CheckCircleIcon 
+                      style={{ color: colors.check, fontSize: window.innerWidth < 640 ? '12px' : '16px' }} 
+                    />
+                  </div>
+                  <p className="text-xs leading-relaxed text-gray-700 sm:text-sm" dir="rtl">{benefit}</p>
                 </div>
-                <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{benefit}</p>
-              </div>
             ))}
           </div>
         </div>
@@ -342,7 +360,7 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
         <div className="mt-auto">
           {(!offer.subscribed && role !== "ROLE_ADMIN") && (
             <div
-              className="relative w-full py-3 sm:py-4 font-bold text-center text-white transition-all duration-300 cursor-pointer rounded-xl sm:rounded-2xl hover:shadow-xl transform hover:scale-105 active:scale-95 overflow-hidden"
+              className="relative w-full py-3 overflow-hidden font-bold text-center text-white transition-all duration-300 transform cursor-pointer sm:py-4 rounded-xl sm:rounded-2xl hover:shadow-xl hover:scale-105 active:scale-95"
               style={{
                 background: `linear-gradient(135deg, ${colors.buttonStart}, ${colors.buttonEnd})`,
               }}
@@ -355,7 +373,7 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
               onClick={onclick}
             >
               {/* Button shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              <div className="absolute inset-0 transition-transform duration-1000 transform -translate-x-full -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full"></div>
               
               <span className="relative z-10 flex items-center justify-center text-sm sm:text-base">
                 {isFreeOffer ? (
@@ -365,8 +383,8 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
                   </>
                 ) : (
                   <>
-                    <span className="hidden sm:inline">💎 Souscrire maintenant</span>
-                    <span className="sm:hidden">💎 Souscrire</span>
+                    <span className="hidden sm:inline">إشترك الآن</span>
+                    <span className="sm:hidden"> إشترك</span>
                   </>
                 )}
               </span>
@@ -377,11 +395,11 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
 
       {/* Decorative elements */}
       <div 
-        className="absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-5"
+        className="absolute w-40 h-40 rounded-full -top-20 -right-20 opacity-5"
         style={{ backgroundColor: colors.border }}
       ></div>
       <div 
-        className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full opacity-5"
+        className="absolute w-32 h-32 rounded-full -bottom-10 -left-10 opacity-5"
         style={{ backgroundColor: colors.check }}
       ></div>
 

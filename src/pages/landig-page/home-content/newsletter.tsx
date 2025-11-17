@@ -81,7 +81,7 @@ const Newsletter = () => {
               </div>
               <div className="student-count">
                 <span>900+</span>
-                <p>Étudiants actifs</p>
+                <p>Élèves actifs</p>
               </div>
             </div>
             
