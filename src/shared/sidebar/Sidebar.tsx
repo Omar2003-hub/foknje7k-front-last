@@ -314,7 +314,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className = "" }) => {
                 />
                 <div className="flex flex-col transition-all duration-300">
                   <span className="text-2xl font-bold text-[#09745f] leading-tight">
-                    Foknje7ek
+                    Fok Nje7ek
                   </span>
                 </div>
                 <button

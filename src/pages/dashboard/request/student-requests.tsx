@@ -76,21 +76,45 @@ const Requests = () => {
 
       // If no cache or cache is old, fetch from API
       const res = await getAllStudentRequests();
+      console.log('Raw student requests:', res.data);
       const formattedData = res.data.map((item: any) => {
-        const subjectNames = Array.isArray(item.subjectIds)
-          ? item.subjectIds.map((id: number | string) => {
-              const found = subjectsArr.find((sub: any) => sub.id === id || sub.value === id);
-              if (found) {
-                const matiere = found.speciality || found.label || id;
-                const level = found.level ? ` (${found.level})` : '';
-                return `${matiere}${level}`;
-              }
-              return id;
-            }).join(', ')
-          : 'Aucune matière';
-        const unitPrice = item.studentOffer?.price ?? 0;
-        const total = unitPrice * (Array.isArray(item.subjectIds) ? item.subjectIds.length : 0);
+        // Debug: log each item
+        console.log('Student request item:', item);
+        const subjectCount = item.requestedSubjectsCount ?? item.subjectCount ?? (Array.isArray(item.subjectIds) ? item.subjectIds.length : 0);
+        const selectedPeriod = item.selectedPeriod ?? item.period ?? 'MONTHLY';
+
+        // Get the price based on selected period
+        let unitPrice = 0;
+        if (item.studentOffer) {
+          switch (selectedPeriod) {
+            case 'MONTHLY':
+              unitPrice = item.studentOffer.monthlyPrice || 0;
+              break;
+            case 'TRIMESTER':
+              unitPrice = item.studentOffer.trimesterPrice || 0;
+              break;
+            case 'SEMESTER':
+              unitPrice = item.studentOffer.semesterPrice || 0;
+              break;
+            case 'YEARLY':
+              unitPrice = item.studentOffer.yearlyPrice || 0;
+              break;
+            default:
+              unitPrice = item.studentOffer.monthlyPrice || 0;
+          }
+        }
+
+        const total = unitPrice * subjectCount;
         const isFree = total === 0;
+
+        // Format period label in French
+        const periodLabels: Record<string, string> = {
+          'MONTHLY': 'Mensuel',
+          'TRIMESTER': 'Trimestriel',
+          'SEMESTER': 'Semestriel',
+          'YEARLY': 'Annuel'
+        };
+        const periodLabel = periodLabels[selectedPeriod] || selectedPeriod;
 
         return {
           ...item,
@@ -102,8 +126,8 @@ const Requests = () => {
           startDate: item.startDate,
           endDate: item.status === "PENDING" ? "N/A" : item.endDate,
           paymentImageUrl: item.paymentImageUrl || "#",
-          subjects: isFree ? "tous les matières" : subjectNames,
-          totalPrice: isFree ? "Free" : `${total} TND`,
+          subjects: isFree ? "Toutes les matières" : `${subjectCount} matière${subjectCount > 1 ? 's' : ''} (${periodLabel})`,
+          totalPrice: isFree ? "Gratuit" : `${total} TND`,
         };
       });
       setData(formattedData);

@@ -56,3 +56,35 @@ export const getAllSubjectsByGroupId = async (id: number) => {
   });
   return response.data;
 };
+
+export const addSubjectToStudentService = async (studentId: string, subjectId: number) => {
+  const response = await NetworkService.getInstance().sendHttpRequest({
+    url: `users/${studentId}/subjects/${subjectId}`,
+    method: "POST",
+    withLoader: true,
+    withFailureLogs: false,
+  });
+  return response.data;
+};
+
+export const removeSubjectFromStudentService = async (studentId: string, subjectId: number) => {
+  const response = await NetworkService.getInstance().sendHttpRequest({
+    url: `users/${studentId}/subjects/${subjectId}`,
+    method: "DELETE",
+    withLoader: true,
+    withFailureLogs: false,
+  });
+  return response.data;
+};
+
+export const addBulkSubjectsToStudentService = async (studentId: string, subjectIds: number[]) => {
+  const response = await NetworkService.getInstance().sendHttpRequest({
+    url: `users/${studentId}/subjects/bulk`,
+    method: "POST",
+    withLoader: true,
+    withFailureLogs: false,
+    data: { subjectIds },
+    headers: { "Content-Type": "application/json" },
+  });
+  return response.data;
+};

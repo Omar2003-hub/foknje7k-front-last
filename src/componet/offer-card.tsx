@@ -1,4 +1,4 @@
-import React, { useContext, useState, MouseEvent } from "react";
+import React, { useState, useContext } from "react";
 import {
   Button,
   Dialog,
@@ -9,6 +9,7 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Typography,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -20,10 +21,11 @@ import {
   updateTeacherOfferService,
 } from "../services/teacher-offer";
 import { useLocation } from "react-router-dom";
-import OfferStudentModal from "./offer-student-modal";
+// import OfferStudentModal from "./offer-student-modal";
 import {
   deleteStudentOfferService,
   updateStudentOfferService,
+  sendOfferService,
 } from "../services/student-offer";
 import { SnackbarContext } from "../config/hooks/use-toast";
 import "./cards.css";
@@ -171,21 +173,27 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
     }
   };
 
-  const [selectedPeriod, setSelectedPeriod] = useState("monthly");
+  const [selectedPeriod, setSelectedPeriod] = useState<'MONTHLY' | 'TRIMESTER' | 'SEMESTER' | 'YEARLY'>('MONTHLY');
+  const [subjectCount, setSubjectCount] = useState(1);
+  const [paymentFile, setPaymentFile] = useState<File | null>(null);
 
   const getPriceForPeriod = () => {
     switch (selectedPeriod) {
-      case "monthly":
+      case 'MONTHLY':
         return offer.monthlyPrice;
-      case "trimester":
+      case 'TRIMESTER':
         return offer.trimesterPrice;
-      case "semester":
+      case 'SEMESTER':
         return offer.semesterPrice;
-      case "yearly":
+      case 'YEARLY':
         return offer.yearlyPrice;
       default:
         return offer.monthlyPrice;
     }
+  };
+
+  const getTotalPrice = () => {
+    return getPriceForPeriod() * subjectCount;
   };
 
   return (
@@ -213,7 +221,7 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
           }}
         >
           <div className="flex items-baseline text-white">
-            <span className="text-lg font-bold sm:text-2xl">{getPriceForPeriod()}</span>
+            <span className="text-lg font-bold sm:text-2xl">{getTotalPrice()}</span>
             <span className="ml-1 text-xs font-medium sm:text-sm">DT</span>
           </div>
         </div>
@@ -302,29 +310,49 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
         </div>
 
         {/* Duration Info */}
-                <div className="flex flex-col items-center mb-3 sm:mb-5">
-                    <div className="flex justify-center w-full mb-2">
-                      {[
-                        { key: 'monthly', label: 'شهري', price: offer.monthlyPrice },
-                        { key: 'trimester', label: 'ثلاثي', price: offer.trimesterPrice },
-                        { key: 'semester', label: 'سداسي', price: offer.semesterPrice },
-                        { key: 'yearly', label: 'سنوي', price: offer.yearlyPrice }
-                      ].filter(({ price }) => price > 0).map(({ key, label }) => (
-                        <button
-                          key={key}
-                          className={`flex-1 mx-1 px-3 py-2 text-sm font-bold rounded-lg border transition-all duration-300 ${
-                            selectedPeriod === key
-                              ? `bg-[${themeColors.paid.border}] text-white border-[${themeColors.paid.border}] shadow`
-                              : `bg-white text-[${themeColors.paid.border}] border-[${themeColors.paid.border}] hover:bg-green-50`
-                          }`}
-                          style={{ minWidth: '70px', borderColor: themeColors.paid.border, backgroundColor: selectedPeriod === key ? themeColors.paid.border : 'white', color: selectedPeriod === key ? 'white' : themeColors.paid.border }}
-                          onClick={() => setSelectedPeriod(key)}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                </div>
+        <div className="flex flex-col items-center mb-3 sm:mb-5">
+          {/* Period Selection */}
+          <div className="flex justify-center w-full mb-3">
+            {[
+              { key: 'MONTHLY', label: 'شهري', price: offer.monthlyPrice },
+              { key: 'TRIMESTER', label: 'ثلاثي', price: offer.trimesterPrice },
+              { key: 'SEMESTER', label: 'سداسي', price: offer.semesterPrice },
+              { key: 'YEARLY', label: 'سنوي', price: offer.yearlyPrice }
+            ].filter(({ price }) => price > 0).map(({ key, label }) => (
+              <button
+                key={key}
+                className={`flex-1 mx-1 px-3 py-2 text-sm font-bold rounded-lg border transition-all duration-300 ${
+                  selectedPeriod === key
+                    ? `bg-[${themeColors.paid.border}] text-white border-[${themeColors.paid.border}] shadow`
+                    : `bg-white text-[${themeColors.paid.border}] border-[${themeColors.paid.border}] hover:bg-green-50`
+                }`}
+                style={{ minWidth: '70px', borderColor: themeColors.paid.border, backgroundColor: selectedPeriod === key ? themeColors.paid.border : 'white', color: selectedPeriod === key ? 'white' : themeColors.paid.border }}
+                onClick={() => setSelectedPeriod(key as any)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {/* Subject Count Selection: only for paid offers */}
+          {!isFreeOffer && (
+            <div className="flex justify-center w-full mb-2">
+                  {[1, 2, 3, 4].map(count => (
+                    <button
+                      key={count}
+                      className={`flex-1 mx-1 px-3 py-2 text-sm font-bold rounded-lg border transition-all duration-300 ${
+                        subjectCount === count
+                          ? `bg-[${themeColors.paid.border}] text-white border-[${themeColors.paid.border}] shadow`
+                          : `bg-white text-[${themeColors.paid.border}] border-[${themeColors.paid.border}] hover:bg-green-50`
+                      }`}
+                      style={{ minWidth: '60px', borderColor: themeColors.paid.border, backgroundColor: subjectCount === count ? themeColors.paid.border : 'white', color: subjectCount === count ? 'white' : themeColors.paid.border }}
+                      onClick={() => setSubjectCount(count)}
+                    >
+                      <span dir="rtl" style={{ unicodeBidi: 'plaintext', fontFamily: 'inherit' }}>{count === 1 ? 'مادة' : 'مواد'}&nbsp;<b>{count}</b></span>
+                    </button>
+                  ))}
+            </div>
+          )}
+        </div>
 
         {/* Benefits Section */}
         <div className="flex-grow mb-4 sm:mb-6">
@@ -364,27 +392,26 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
               style={{
                 background: `linear-gradient(135deg, ${colors.buttonStart}, ${colors.buttonEnd})`,
               }}
-              onMouseEnter={(e: MouseEvent<HTMLDivElement>) => {
+              onMouseEnter={e => {
                 e.currentTarget.style.background = `linear-gradient(135deg, ${colors.buttonHoverStart}, ${colors.buttonHoverEnd})`;
               }}
-              onMouseLeave={(e: MouseEvent<HTMLDivElement>) => {
+              onMouseLeave={e => {
                 e.currentTarget.style.background = `linear-gradient(135deg, ${colors.buttonStart}, ${colors.buttonEnd})`;
               }}
-              onClick={onclick}
+              onClick={handleOpenModal}
             >
               {/* Button shine effect */}
               <div className="absolute inset-0 transition-transform duration-1000 transform -translate-x-full -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full"></div>
-              
               <span className="relative z-10 flex items-center justify-center text-sm sm:text-base">
                 {isFreeOffer ? (
                   <>
-                    <span className="hidden sm:inline">🎯 Rejoindre gratuitement</span>
-                    <span className="sm:hidden">🎯 Rejoindre</span>
+                    <span className="hidden sm:inline">إشترك مجاناً</span>
+                    <span className="sm:hidden">إشترك</span>
                   </>
                 ) : (
                   <>
                     <span className="hidden sm:inline">إشترك الآن</span>
-                    <span className="sm:hidden"> إشترك</span>
+                    <span className="sm:hidden">إشترك</span>
                   </>
                 )}
               </span>
@@ -404,16 +431,167 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
       ></div>
 
       {/* Modals */}
-      {isOfferStudent ? (
-        <OfferStudentModal
-          open={isModalOpen}
-          onClose={handleCloseModal}
-          initialData={{ image: offer.imageUrl, ...offer }}
-          modalTitle="Modifier l'offre"
-          buttonText="Mettre à jour"
-          onButtonClick={handleAction}
-        />
-      ) : (
+      {/* Student Offer Request Modal */}
+      {isOfferStudent && (
+        <Dialog open={isModalOpen} onClose={handleCloseModal} maxWidth="sm" fullWidth>
+          <DialogTitle className="flex items-center justify-between text-white bg-primary">
+            <span className="text-xl font-montserrat_semi_bold">طلب الإشتراك</span>
+            <IconButton onClick={handleCloseModal} className="text-white">
+              <MoreVertIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent className="px-6 py-6">
+            {/* Offer Summary */}
+            <div className="p-4 mb-6 rounded-lg bg-gradient-to-r from-blue-50 to-green-50">
+              <h3 className="mb-2 text-lg font-bold text-gray-800">{offer.title}</h3>
+              <p className="text-sm text-gray-600">{offer.subTitle}</p>
+            </div>
+
+            {/* Period Selection */}
+            <div className="mb-6">
+              <Typography variant="h6" className="mb-3 text-right font-montserrat_medium">اختر الفترة</Typography>
+              <div className="flex justify-center gap-2 mb-4">
+                {[
+                  { key: 'MONTHLY', label: 'شهري', price: offer.monthlyPrice },
+                  { key: 'TRIMESTER', label: 'ثلاثي', price: offer.trimesterPrice },
+                  { key: 'SEMESTER', label: 'سداسي', price: offer.semesterPrice },
+                  { key: 'YEARLY', label: 'سنوي', price: offer.yearlyPrice }
+                ].filter(({ price }) => price > 0).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    className={`flex-1 px-3 py-2 text-sm font-bold rounded-lg border transition-all duration-300 ${
+                      selectedPeriod === key
+                        ? 'bg-primary text-white border-primary shadow'
+                        : 'bg-white text-primary border-primary hover:bg-blue-50'
+                    }`}
+                    onClick={() => setSelectedPeriod(key as any)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Subject Count Selection: only for paid offers */}
+            {!isFreeOffer && (
+              <div className="mb-6">
+                <Typography variant="h6" className="mb-3 text-right font-montserrat_medium">عدد المواد</Typography>
+                <div className="flex justify-center gap-2 mb-4">
+                  {[1, 2, 3, 4].map(count => (
+                    <button
+                      key={count}
+                      className={`flex-1 px-3 py-2 text-sm font-bold rounded-lg border transition-all duration-300 ${
+                        subjectCount === count
+                          ? 'bg-primary text-white border-primary shadow'
+                          : 'bg-white text-primary border-primary hover:bg-blue-50'
+                      }`}
+                      onClick={() => setSubjectCount(count)}
+                    >
+                      <span dir="rtl" style={{ unicodeBidi: 'plaintext', fontFamily: 'inherit' }}>{count === 1 ? 'مادة' : 'مواد'}&nbsp;<b>{count}</b></span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Price Summary */}
+            <div className="p-4 mb-6 rounded-lg bg-gradient-to-r from-green-50 to-blue-50">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium text-gray-700">سعر المادة الواحدة:</span>
+                <span className="font-bold text-primary">{getPriceForPeriod()} د.ت</span>
+              </div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium text-gray-700">عدد المواد:</span>
+                <span className="font-bold text-primary">{subjectCount}</span>
+              </div>
+              <hr className="my-2" />
+              <div className="flex items-center justify-between">
+                <span className="text-lg font-bold text-gray-800">المجموع:</span>
+                <span className="text-xl font-bold text-green-600">{getTotalPrice()} د.ت</span>
+              </div>
+            </div>
+            {/* Payment Upload */}
+            <div className="p-4 mb-6 rounded-lg bg-gray-50">
+              <Typography variant="h6" className="mb-4 text-right font-montserrat_semi_bold">صورة الدفع</Typography>
+              <div className="flex flex-col items-center justify-center w-full h-32 transition-colors border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                onClick={() => document.getElementById('payment-file-input')?.click()}
+              >
+                <div className="flex flex-col items-center justify-center px-4">
+                  <MoreVertIcon className="w-8 h-8 mb-2 text-gray-500" />
+                  <p className="mb-1 text-sm text-center text-gray-500">
+                    <span className="font-semibold">اضغط لرفع صورة الدفع</span>
+                  </p>
+                  <p className="text-xs text-center text-gray-500">JPG, PNG أو PDF (حد أقصى 5MB)</p>
+                </div>
+                <input
+                  type="file"
+                  id="payment-file-input"
+                  className="hidden"
+                  onChange={e => setPaymentFile(e.target.files?.[0] || null)}
+                  accept="image/*,.pdf"
+                />
+              </div>
+              {paymentFile && (
+                <div className="p-3 mt-3 border border-green-200 rounded-lg bg-green-50">
+                  <p className="text-sm font-medium text-green-700">✓ تم اختيار الملف: {paymentFile.name}</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+          <DialogActions className="px-6 pb-6">
+            <Button 
+              variant="outlined" 
+              onClick={handleCloseModal} 
+              className="px-6 py-2 text-gray-700 border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              إلغاء
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => {
+                // Submit student subscription request
+                const formData = new FormData();
+                formData.append("selectedPeriod", selectedPeriod);
+                formData.append("requestedSubjectsCount", String(subjectCount));
+                if (paymentFile) formData.append("paymentImage", paymentFile);
+                
+                // Call backend API to submit the subscription request
+                sendOfferService(offer.id, formData)
+                  .then((response) => {
+                    if (snackbarContext) {
+                      snackbarContext.showMessage(
+                        "نجح",
+                        "تم إرسال طلب الاشتراك بنجاح",
+                        "success"
+                      );
+                    }
+                    handleCloseModal();
+                    // Reset form
+                    setSelectedPeriod('MONTHLY');
+                    setSubjectCount(1);
+                    setPaymentFile(null);
+                  })
+                  .catch((error) => {
+                    console.error(error);
+                    if (snackbarContext) {
+                      snackbarContext.showMessage(
+                        "خطأ",
+                        "فشل إرسال طلب الاشتراك",
+                        "error"
+                      );
+                    }
+                  });
+              }}
+              disabled={!paymentFile || subjectCount < 1}
+              className="px-6 py-2 ml-3 font-bold text-white rounded-lg bg-primary hover:bg-primary-dark disabled:opacity-50"
+            >
+              تأكيد و إرسال ({getTotalPrice()} د.ت)
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+      {/* Admin/Teacher Modals */}
+      {!isOfferStudent && (
         <FormModal
           open={isModalOpen}
           onClose={handleCloseModal}

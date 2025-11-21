@@ -44,7 +44,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   statusName = "Image",
 }) => {
   return (
-    <div className="bg-white p-10 mb-10 rounded-xl overflow-x-scroll w-[80vw]  lg:w-full max-h-[80vh]">
+    <div className="bg-white p-10 mb-10 rounded-xl overflow-x-auto w-full max-h-[80vh]">
       <p className="font-montserrat_medium text-title mb-7 text-lg">{title}</p>
       <div>
         <table className="w-full bg-white">

@@ -150,17 +150,17 @@ const Home: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col items-center space-y-6 px-4 md:px-8">
+      <div className="flex flex-col items-center px-4 space-y-6 md:px-8">
         <div className="-mt-[40px] w-full">
           <WelcomeCard />
         </div>
              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full pt-10 mb-10 px-4">
-                {profileData.filter(item => item.active === true).map((item) => (
+              <div className="grid w-full grid-cols-1 gap-6 px-4 pt-10 mb-10 sm:grid-cols-2 lg:grid-cols-3">
+                {profileData.map((item) => (
                   <div
                     key={item.id}
                     onClick={() => navigation(`/subject/${item.id}`)}
-                    className="relative w-full overflow-hidden transition-all duration-300 ease-in-out transform bg-white shadow-xl rounded-2xl hover:shadow-2xl hover:scale-105 group cursor-pointer"
+                    className="relative w-full overflow-hidden transition-all duration-300 ease-in-out transform bg-white shadow-xl cursor-pointer rounded-2xl hover:shadow-2xl hover:scale-105 group"
                   >
                     {/* Cover Image with Gradient Overlay */}
                     <div className="relative h-40 overflow-hidden rounded-t-2xl">
