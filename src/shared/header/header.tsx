@@ -164,6 +164,21 @@ const Header: React.FC = () => {
         />
       )}
 
+      {/* Mobile Menu Toggle Button - Show only when not logged in */}
+      {!isLogged && (
+        <button
+          onClick={toggleMobileMenu}
+          className="lg:hidden p-2 ml-auto mr-4 text-primary hover:text-primary/80 transition-colors z-30"
+          aria-label="Toggle mobile menu"
+        >
+          {isMobileMenuOpen ? (
+            <CloseIcon className="w-8 h-8" />
+          ) : (
+            <MenuIcon className="w-8 h-8" />
+          )}
+        </button>
+      )}
+
       {/* Mobile Menu */}
       <nav
         className={`lg:hidden fixed top-0 left-0 w-full h-full bg-[#f9f6f1] p-6 z-20 transition-transform duration-300 ease-in-out ${
