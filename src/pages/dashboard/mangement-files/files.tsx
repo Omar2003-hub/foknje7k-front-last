@@ -9,25 +9,13 @@ import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import YouTubeIcon from "@mui/icons-material/YouTube";
 import {
   getAllSubjectsByGroupId,
-  getAllUserSubjectService,
 } from "../../../services/subject-service";
 import SubjectIcon from "@mui/icons-material/Subject";
-import { uploadItemPlayListService, updateItemPlayListService, getSasTokenService } from "../../../services/playList-service";
+import { uploadItemPlayListService } from "../../../services/playList-service";
 import CircularProgress from "@mui/material/CircularProgress";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import { SnackbarContext } from "../../../config/hooks/use-toast";
 import { getUserGroupService } from "../../../services/group-service";
 import CustomSelect from "../../../shared/custom-select/custom-select";
-
-import { BlobClient, BlobServiceClient, BlockBlobClient } from '@azure/storage-blob';
-
-
-import { fileDB } from "../../../services/firebase/firebaseConfig";
-import { ref, uploadBytes, getDownloadURL, uploadBytesResumable } from "firebase/storage";
-import { log } from "console";
-import { blob } from "node:stream/consumers";
-import { co } from "@fullcalendar/core/internal-common";
 
 
 const Files = () => {

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import CustomTable from "../../../shared/custom-table/custom-table";
-import { columnsProf, columnsStudent } from "../../../mocks/fakeData";
+import { columnsStudent } from "../../../mocks/fakeData";
 import {
   Box,
   Button,
@@ -22,10 +22,10 @@ import {
   getUserGroupService,
 } from "../../../services/group-service";
 import {
-  addSubjectToStudentService,
   removeSubjectFromStudentService,
   getAllUserSubjectService,
-  addBulkSubjectsToStudentService, // <-- import bulk API
+  addBulkSubjectsToStudentService,
+  getAllSubjectsByGroupId,
 } from "../../../services/subject-service";
 import CustomButton from "../../../shared/custom-button/custom-button";
 import CloseIcon from "@mui/icons-material/Close";
@@ -55,6 +55,8 @@ const ManagementStudent = () => {
   const [deleteGroup, setDeleteGroup] = useState<number | null>(null);
   const [deleteSubject, setDeleteSubject] = useState<number | null>(null);
   const [selectedSubjects, setSelectedSubjects] = useState<number[]>([]); // for bulk add
+  const [selectedGroupForSubject, setSelectedGroupForSubject] = useState<number | null>(null);
+  const [filteredSubjectOptions, setFilteredSubjectOptions] = useState<{ label: string; value: number }[]>([]);
   const snackbarContext = useContext(SnackbarContext);
 
   useEffect(() => {
@@ -116,20 +118,57 @@ const ManagementStudent = () => {
     setSelectedRow(row);
     setOpenAddSubjectDialog(true);
     setSelectedSubjects([]); // reset selection
+    setSelectedGroupForSubject(null);
+    setFilteredSubjectOptions([]);
   };
   const handleAddSubjectClose = () => {
     setOpenAddSubjectDialog(false);
     setSelectedSubject("");
+    setSelectedGroupForSubject(null);
+    setFilteredSubjectOptions([]);
   };
+  // When group is selected, fetch all subjects for that group from the backend
+  useEffect(() => {
+    if (!selectedGroupForSubject) {
+      setFilteredSubjectOptions([]);
+      return;
+    }
+    // Fetch all subjects for the selected group
+    getAllSubjectsByGroupId(selectedGroupForSubject).then((subjects: any) => {
+      console.log('Subjects returned by getAllSubjectsByGroupId:', subjects);
+      // The correct array is subjects.data (from API), or subjects.data.data
+      const subjectList = Array.isArray(subjects?.data) ? subjects.data : (Array.isArray(subjects?.data?.data) ? subjects.data.data : []);
+      // Get assigned subject IDs
+      const assignedSubjectIds = Array.isArray(selectedRow?.subjects)
+        ? selectedRow.subjects.map((s: any) => s.id)
+        : [];
+      // Deduplicate by ID
+      const uniqueSubjectsMap = new Map();
+      subjectList.forEach((subject: any) => {
+        if (!uniqueSubjectsMap.has(subject.id)) {
+          uniqueSubjectsMap.set(subject.id, subject);
+        }
+      });
+      const uniqueSubjects = Array.from(uniqueSubjectsMap.values());
+      setFilteredSubjectOptions(
+        uniqueSubjects.map((subject: any) => ({
+          label: subject.title || subject.speciality,
+          value: subject.id,
+          assigned: assignedSubjectIds.includes(subject.id),
+        }))
+      );
+      setSelectedSubjects([]); // reset subjects when group changes
+    });
+  }, [selectedGroupForSubject, selectedRow]);
 
-  const handleDeleteSubjectClick = (row: any) => {
-    setSelectedRow(row);
-    setOpenDeleteSubjectDialog(true);
-  };
-  const handleDeleteSubjectClose = () => {
-    setOpenDeleteSubjectDialog(false);
-    setDeleteSubject(null);
-  };
+  // const handleDeleteSubjectClick = (row: any) => {
+  //   setSelectedRow(row);
+  //   setOpenDeleteSubjectDialog(true);
+  // };
+  // const handleDeleteSubjectClose = () => {
+  //   setOpenDeleteSubjectDialog(false);
+  //   setDeleteSubject(null);
+  // };
 
   const handleSave = () => {
     addStudentGroupService(selectedGroup, selectedStudent)
@@ -181,31 +220,31 @@ const ManagementStudent = () => {
     }
   };
 
-  const handleSaveSubject = () => {
-    if (selectedRow && selectedSubject) {
-      addSubjectToStudentService(selectedRow.id, Number(selectedSubject))
-        .then(() => {
-          getAllStudentFromSuperTeacher()
-            .then((res) => {
-              setData(res.data);
-            })
-            .catch((e) => {
-              console.log(e);
-            });
-          if (snackbarContext) {
-            snackbarContext.showMessage(
-              "Succes",
-              "Matière ajoutée avec succès",
-              "success",
-            );
-          }
-          handleAddSubjectClose();
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    }
-  };
+  // const handleSaveSubject = () => {
+  //   if (selectedRow && selectedSubject) {
+  //     addSubjectToStudentService(selectedRow.id, Number(selectedSubject))
+  //       .then(() => {
+  //         getAllStudentFromSuperTeacher()
+  //           .then((res) => {
+  //             setData(res.data);
+  //           })
+  //           .catch((e) => {
+  //             console.log(e);
+  //           });
+  //         if (snackbarContext) {
+  //           snackbarContext.showMessage(
+  //             "Succes",
+  //             "Matière ajoutée avec succès",
+  //             "success",
+  //           );
+  //         }
+  //         handleAddSubjectClose();
+  //       })
+  //       .catch((e) => {
+  //         console.log(e);
+  //       });
+  //   }
+  // };
 
   const handleSaveSubjectsBulk = async () => {
     if (selectedRow && selectedSubjects.length > 0) {
@@ -228,35 +267,43 @@ const ManagementStudent = () => {
     }
   };
 
-  const handleDeleteSubject = () => {
-    if (selectedRow && deleteSubject) {
-      removeSubjectFromStudentService(selectedRow.id, deleteSubject)
-        .then(() => {
-          getAllStudentFromSuperTeacher()
-            .then((res) => {
-              setData(res.data);
-            })
-            .catch((e) => {
-              console.log(e);
-            });
-          if (snackbarContext) {
-            snackbarContext.showMessage(
-              "Succes",
-              "Matière supprimée avec succès",
-              "success",
-            );
-          }
-          handleDeleteSubjectClose();
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    }
-  };
+  // const handleDeleteSubject = () => {
+  //   if (selectedRow && deleteSubject) {
+  //     removeSubjectFromStudentService(selectedRow.id, deleteSubject)
+  //       .then(() => {
+  //         getAllStudentFromSuperTeacher()
+  //           .then((res) => {
+  //             setData(res.data);
+  //           })
+  //           .catch((e) => {
+  //             console.log(e);
+  //           });
+  //         if (snackbarContext) {
+  //           snackbarContext.showMessage(
+  //             "Succes",
+  //             "Matière supprimée avec succès",
+  //             "success",
+  //           );
+  //         }
+  //         handleDeleteSubjectClose();
+  //       })
+  //       .catch((e) => {
+  //         console.log(e);
+  //       });
+  //   }
+  // };
 
   const handleDeleteSubjectSingle = async (subjectId: number) => {
     if (selectedRow && subjectId) {
       await removeSubjectFromStudentService(selectedRow.id, subjectId);
+      // Update the UI immediately for better UX
+      setSelectedRow((prev: any) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          subjects: prev.subjects.filter((s: any) => s.id !== subjectId),
+        };
+      });
       getAllStudentFromSuperTeacher()
         .then((res) => {
           setData(res.data);
@@ -281,21 +328,21 @@ const ManagementStudent = () => {
         className="px-4 py-2 text-sm whitespace-nowrap"
         onClick={() => handleAddSubjectClick(row)}
       >
-        + Matière
+        Gérer Matières
       </button>
-      <button
+      {/* <button
         style={{ background: '#ef4444', color: '#fff', border: '2px solid #b91c1c', fontWeight: 'bold', borderRadius: '9999px', boxShadow: '0 2px 8px rgba(239,68,68,0.2)' }}
         className="px-4 py-2 text-sm whitespace-nowrap"
         onClick={() => handleDeleteSubjectClick(row)}
       >
         - Matière
-      </button>
+      </button> */}
       <button
         style={{ background: '#dc2626', color: '#fff', border: '2px solid #991b1b', fontWeight: 'bold', borderRadius: '9999px', boxShadow: '0 2px 8px rgba(220,38,38,0.2)' }}
         className="px-4 py-2 text-sm whitespace-nowrap"
         onClick={() => handleDeleteClick(row)}
       >
-        Supprimer
+        Supprimer Classe
       </button>
     </div>
   );
@@ -446,7 +493,7 @@ const ManagementStudent = () => {
         </Box>
       </Dialog>
 
-      {/* Add Subject Dialog - Redesigned */}
+      {/* Add Subject Dialog - Guided group/subject selection */}
       <Dialog
         open={openAddSubjectDialog}
         onClose={handleAddSubjectClose}
@@ -466,35 +513,75 @@ const ManagementStudent = () => {
             <p className="mb-4">
               Élève sélectionné: <strong>{selectedRow?.fullName}</strong>
             </p>
+            {/* Group selection dropdown */}
             <FormControl fullWidth className="mb-4">
-              <label>Ajouter des matières</label>
+              <label>Choisir un groupe</label>
               <Select
-                labelId="select-subject-label"
-                multiple
-                value={selectedSubjects}
-                onChange={(e) => setSelectedSubjects(e.target.value as number[])}
-                renderValue={(selected) =>
-                  subjectOptions
-                    .filter((opt) => selected.includes(opt.value))
-                    .map((opt) => opt.label)
-                    .join(", ")
-                }
-                MenuProps={{
-                  PaperProps: {
-                    style: {
-                      maxHeight: 300,
-                      zIndex: 1300,
-                    },
-                  },
-                }}
+                labelId="select-group-for-subject-label"
+                value={selectedGroupForSubject ?? ''}
+                onChange={(e) => setSelectedGroupForSubject(Number(e.target.value))}
+                displayEmpty
               >
-                {subjectOptions.map((subject: any) => (
-                  <MenuItem key={subject.value} value={subject.value}>
-                    {subject.label}
+                <MenuItem value="" disabled>
+                  Sélectionner un groupe
+                </MenuItem>
+                {selectedRow?.groups?.map((group: any) => (
+                  <MenuItem key={group.id} value={group.id}>
+                    {group.title}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
+            {/* Subject selection dropdown, only show if group is selected */}
+            {selectedGroupForSubject && (
+              <FormControl fullWidth className="mb-4">
+                <label>Ajouter des matières du groupe</label>
+                <Select
+                  labelId="select-subject-label"
+                  multiple
+                  value={Array.isArray(selectedSubjects) ? selectedSubjects : []}
+                  onChange={(e) => {
+                    let value = e.target.value;
+                    let arr: number[] = [];
+                    if (Array.isArray(value)) {
+                      arr = value.map((v) => Number(v));
+                    } else if (typeof value === 'string') {
+                      arr = value.split(',').map((v) => Number(v));
+                    } else if (typeof value === 'number') {
+                      arr = [value];
+                    }
+                    setSelectedSubjects(arr);
+                  }}
+                  renderValue={(selected) =>
+                    filteredSubjectOptions
+                      .filter((opt) => Array.isArray(selected) && selected.includes(opt.value))
+                      .map((opt) => opt.label)
+                      .join(", ")
+                  }
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 300,
+                        zIndex: 1300,
+                      },
+                    },
+                  }}
+                >
+                  {filteredSubjectOptions.length > 0 ? (
+                    filteredSubjectOptions.map((subject: any) => (
+                      <MenuItem key={subject.value} value={subject.value} disabled={subject.assigned}>
+                        {subject.label}
+                        {subject.assigned && (
+                          <span style={{ color: '#888', marginLeft: 8 }}>(déjà assignée)</span>
+                        )}
+                      </MenuItem>
+                    ))
+                  ) : (
+                    <MenuItem disabled>Aucune matière disponible pour ce groupe</MenuItem>
+                  )}
+                </Select>
+              </FormControl>
+            )}
             <div className="flex justify-end mt-6 space-x-4">
               <Button
                 className={"w-44 rounded-2xl border"}
@@ -504,26 +591,67 @@ const ManagementStudent = () => {
               >
                 Annuler
               </Button>
-              <CustomButton
-                text={"Ajouter"}
-                width={"w-44"}
-                onClick={handleSaveSubjectsBulk}
-              />
+              <span
+                className={
+                  !selectedGroupForSubject || selectedSubjects.length === 0
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
+              >
+                <CustomButton
+                  text={"Ajouter"}
+                  width={"w-44"}
+                  onClick={handleSaveSubjectsBulk}
+                />
+              </span>
             </div>
             <div className="mt-8">
               <label className="block mb-2 font-semibold">Matières assignées</label>
-              <div className="flex flex-wrap gap-2">
+              <div>
                 {selectedRow?.subjects?.length > 0 ? (
-                  selectedRow.subjects.map((subject: any) => (
-                    <div key={subject.id} className="flex items-center px-3 py-1 bg-gray-100 rounded">
-                      <span className="mr-2">{subject.title || subject.speciality}</span>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => handleDeleteSubjectSingle(subject.id)}
-                      >
-                        <CloseIcon fontSize="small" />
-                      </IconButton>
+                  // Group subjects by groupId, try to match group from selectedRow.groups if missing
+                  Object.entries(
+                    selectedRow.subjects.reduce((acc: any, subject: any) => {
+                      let groupId = subject.groupId;
+                      let groupTitle = subject.groupTitle || subject.group?.title;
+                      // Try to match group if missing
+                      if (!groupId || !groupTitle) {
+                        const foundGroup = Array.isArray(selectedRow.groups)
+                          ? selectedRow.groups.find((g: any) =>
+                              g.id === subject.groupId ||
+                              (subject.group && g.id === subject.group.id) ||
+                              (subject.groupId == null && subject.group && g.id === subject.group.id)
+                            )
+                          : null;
+                        if (!groupId && foundGroup) groupId = foundGroup.id;
+                        if (!groupTitle && foundGroup) groupTitle = foundGroup.title;
+                      }
+                      // Fallback if still missing
+                      groupId = groupId || 'Autre';
+                      groupTitle = groupTitle || 'Autre';
+                      if (!acc[groupId]) {
+                        acc[groupId] = { title: groupTitle, subjects: [] };
+                      }
+                      acc[groupId].subjects.push(subject);
+                      return acc;
+                    }, {})
+                  ).map(([groupId, groupData]: any) => (
+                    <div key={groupId} className="mb-4">
+                      <div className="mb-2 font-semibold text-blue-700">{groupData.title}</div>
+                      <div className="flex flex-wrap gap-2">
+                        {groupData.subjects.map((subject: any) => (
+                          <div key={subject.id} className="flex items-center px-3 py-1 bg-gray-100 rounded">
+                            <span className="mr-2">{subject.title || subject.speciality}</span>
+                            <IconButton
+                              size="small"
+                              color="error"
+                              onClick={() => handleDeleteSubjectSingle(subject.id)}
+                            >
+                              <CloseIcon fontSize="small" />
+                            </IconButton>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -536,7 +664,7 @@ const ManagementStudent = () => {
       </Dialog>
 
       {/* Delete Subject Dialog */}
-      <Dialog
+      {/* <Dialog
         open={openDeleteSubjectDialog}
         onClose={handleDeleteSubjectClose}
         fullWidth
@@ -587,7 +715,7 @@ const ManagementStudent = () => {
             </div>
           </DialogContent>
         </Box>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 };

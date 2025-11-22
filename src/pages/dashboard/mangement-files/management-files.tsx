@@ -5,7 +5,6 @@ import CustomSelect from "../../../shared/custom-select/custom-select";
 import { getAllUserSubjectService, getSubjectServiceById } from "../../../services/subject-service";
 import {
   deleteItemPlaylistService,
-  getPlayListService,
 } from "../../../services/playList-service";
 import {
   Box,
@@ -17,10 +16,6 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CustomButton from "../../../shared/custom-button/custom-button";
-import { dA } from "@fullcalendar/core/internal-common";
-import { log } from "console";
-import { t } from "i18next";
-import { set } from "video.js/dist/types/tech/middleware";
 
 const ManagementFiles = () => {
   const [subject, setSubjects] = useState<any>([]);
