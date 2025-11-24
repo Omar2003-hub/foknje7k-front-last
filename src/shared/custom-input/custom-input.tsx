@@ -24,6 +24,7 @@ interface CustomInputProps {
   error?: boolean;
   errorMessage?: string;
   labelClasses?: string;
+  disabled?: boolean;
 }
 
 const CustomInput: React.FC<CustomInputProps> = ({
@@ -39,6 +40,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
   error = false,
   errorMessage,
   labelClasses,
+  disabled = false,
 }) => {
   const [isTouched, setIsTouched] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -128,9 +130,10 @@ const CustomInput: React.FC<CustomInputProps> = ({
               setIsTouched(true);
               if (onBlur) onBlur(e); // Notify parent about blur
             }}
+            disabled={disabled}
             className={`border text-xs font-montserrat_regular border-border h-12 rounded-lg  w-full pr-8 ${
               iconPrefix ? "ps-12" : "ps-3"
-            } bg-transparent ${error ? "border-red-500" : ""}`}
+            } bg-transparent ${error ? "border-red-500" : ""} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
           />
         )}
         {inputType === "password" && (

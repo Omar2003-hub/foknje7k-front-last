@@ -47,12 +47,21 @@ export const getUserPublicGroupService = async () => {
   });
   return response.data;
 };
-export const addStudentGroupService = async (id: number, studentId: string) => {
+export const addStudentGroupService = async (
+  id: number,
+  studentId: string,
+  studentOfferId: string,
+  selectedPeriod: string
+) => {
   const response = await NetworkService.getInstance().sendHttpRequest({
-    url: `groups/${id}/add-student/${studentId}`,
+    url: `groups/add-student/${studentId}`,
     method: "PUT",
     withLoader: true,
     withFailureLogs: false,
+    data: {
+      studentOfferId,
+      selectedPeriod,
+    },
   });
   return response.data;
 };

@@ -104,7 +104,21 @@ const Requests = () => {
           }
         }
 
-        const total = unitPrice * subjectCount;
+        // Apply special multipliers for YEARLY period
+        let subjectMultiplier = subjectCount;
+        if (selectedPeriod === 'YEARLY') {
+          switch (subjectCount) {
+            case 1: subjectMultiplier = 1; break;
+            case 2: subjectMultiplier = 1.5; break;
+            case 3: subjectMultiplier = 2.25; break;
+            case 4: subjectMultiplier = 3; break;
+            default: subjectMultiplier = subjectCount;
+          }
+        } else {
+          // For other periods, 4 subjects = 3.5x
+          subjectMultiplier = subjectCount === 4 ? 3.5 : subjectCount;
+        }
+        const total = Math.floor(unitPrice * subjectMultiplier);
         const isFree = total === 0;
 
         // Format period label in French
@@ -126,7 +140,10 @@ const Requests = () => {
           startDate: item.startDate,
           endDate: item.status === "PENDING" ? "N/A" : item.endDate,
           paymentImageUrl: item.paymentImageUrl || "#",
-          subjects: isFree ? "Toutes les matières" : `${subjectCount} matière${subjectCount > 1 ? 's' : ''} (${periodLabel})`,
+          period: periodLabel,
+          subjects: (isFree || item.studentOffer?.allSubjects)
+            ? `Toutes les matières`
+            : `${subjectCount} matière${subjectCount > 1 ? 's' : ''}`,
           totalPrice: isFree ? "Gratuit" : `${total} TND`,
         };
       });
@@ -388,6 +405,10 @@ const Requests = () => {
             {
               Header: "Matières",
               accessor: "subjects",
+            },
+            {
+              Header: "Période",
+              accessor: "period",
             },
             {
               Header: "Prix total",

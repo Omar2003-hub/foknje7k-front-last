@@ -19,11 +19,9 @@ import {
 import {
   addStudentGroupService,
   RemoveStudentGroupService,
-  getUserGroupService,
 } from "../../../services/group-service";
 import {
   removeSubjectFromStudentService,
-  getAllUserSubjectService,
   addBulkSubjectsToStudentService,
   getAllSubjectsByGroupId,
 } from "../../../services/subject-service";
@@ -37,23 +35,23 @@ import CustomAutocomplete from "../../../shared/custom-autoComplete/custom-autoc
 const ManagementStudent = () => {
   const id = useSelector((state: RootState) => state?.user?.userData?.id);
   const [data, setData] = useState<any>([]);
-  const [groupOptions, setGroupOptions] = useState<
-    { label: string; value: number }[]
-  >([]);
-  const [subjectOptions, setSubjectOptions] = useState<
-    { label: string; value: number }[]
-  >([]);
   const [student, setStudent] = useState<any>([]);
   const [selectedStudent, setSelectedStudent] = useState<any>("");
-  const [selectedGroup, setSelectedGroup] = useState<number>(0);
-  const [selectedSubject, setSelectedSubject] = useState<string>("");
+  const [studentOffers, setStudentOffers] = useState<any[]>([]);
+  const [selectedStudentOffer, setSelectedStudentOffer] = useState<number | null>(null);
+  // Use enum values for periods and map to user-friendly labels
+  const periodOptions = [
+    { value: "MONTHLY", label: "Mensuel" },
+    { value: "TRIMESTER", label: "Trimestriel" },
+    { value: "SEMESTER", label: "Semestriel" },
+    { value: "YEARLY", label: "Annuel" },
+  ];
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openAddSubjectDialog, setOpenAddSubjectDialog] = useState(false);
-  const [openDeleteSubjectDialog, setOpenDeleteSubjectDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>(null);
   const [deleteGroup, setDeleteGroup] = useState<number | null>(null);
-  const [deleteSubject, setDeleteSubject] = useState<number | null>(null);
   const [selectedSubjects, setSelectedSubjects] = useState<number[]>([]); // for bulk add
   const [selectedGroupForSubject, setSelectedGroupForSubject] = useState<number | null>(null);
   const [filteredSubjectOptions, setFilteredSubjectOptions] = useState<{ label: string; value: number }[]>([]);
@@ -78,32 +76,15 @@ const ManagementStudent = () => {
       .catch((e) => {
         console.log(e);
       });
-    getUserGroupService()
-      .then((res) => {
-        const groupOptions = res.data.map((group: any) => ({
-          label: group.title,
-          value: group.id,
-        }));
-        setGroupOptions(groupOptions);
-      })
-      .catch((e) => {
+    // Fetch student offers
+    import("../../../services/student-offer").then(({ getAllStudentOfferService }) => {
+      getAllStudentOfferService().then((res: any) => {
+        setStudentOffers(Array.isArray(res) ? res : res.data || []);
+      }).catch((e: any) => {
         console.log(e);
       });
-    getAllUserSubjectService()
-      .then((res) => {
-        console.log('Subjects API response:', res.data); // Debugging log
-        const subjectOptions = Array.isArray(res.data)
-          ? res.data.map((subject: any) => ({
-              label: subject.speciality, // Updated to use 'speciality' for label
-              value: subject.id, // 'id' remains the value
-            }))
-          : [];
-        console.log('Mapped subject options:', subjectOptions); // Debugging log
-        setSubjectOptions(subjectOptions);
-      })
-      .catch((e) => {
-        console.error('Error fetching subjects:', e); // Debugging log
-      });
+    });
+    // Optionally fetch periods from API if needed
   }, []);
 
   const handleAddClick = () => setOpenAddDialog(true);
@@ -123,7 +104,6 @@ const ManagementStudent = () => {
   };
   const handleAddSubjectClose = () => {
     setOpenAddSubjectDialog(false);
-    setSelectedSubject("");
     setSelectedGroupForSubject(null);
     setFilteredSubjectOptions([]);
   };
@@ -171,7 +151,17 @@ const ManagementStudent = () => {
   // };
 
   const handleSave = () => {
-    addStudentGroupService(selectedGroup, selectedStudent)
+    if (!selectedStudent || !selectedStudentOffer || !selectedPeriod) {
+      if (snackbarContext) {
+        snackbarContext.showMessage(
+          "Erreur",
+          "Veuillez remplir tous les champs.",
+          "error",
+        );
+      }
+      return;
+    }
+    addStudentGroupService(0, selectedStudent, String(selectedStudentOffer), selectedPeriod)
       .then((res) => {
         getAllStudentFromSuperTeacher()
           .then((res) => {
@@ -188,6 +178,8 @@ const ManagementStudent = () => {
           );
         }
         handleAddClose();
+        setSelectedStudentOffer(null);
+        setSelectedPeriod("");
       })
       .catch((e) => {
         console.log(e);
@@ -407,20 +399,33 @@ const ManagementStudent = () => {
             </FormControl>
 
             <FormControl fullWidth className="mb-4">
-              <label>Choisir Groupe</label>
+              <label>Choisir Offre</label>
               <Select
-                labelId="select-group-label"
-                value={selectedGroup}
-                onChange={(e) => setSelectedGroup(e.target.value as number)}
+                labelId="select-student-offer-label"
+                value={selectedStudentOffer ?? ""}
+                onChange={(e) => setSelectedStudentOffer(Number(e.target.value))}
+                displayEmpty
               >
-                {groupOptions.map((group: any) => (
-                  <MenuItem key={group.value} value={group.value}>
-                    {group.label}
-                  </MenuItem>
+                <MenuItem value="" disabled>Choisir une offre</MenuItem>
+                {studentOffers.map((offer: any) => (
+                  <MenuItem key={offer.id} value={offer.id}>{offer.title}</MenuItem>
                 ))}
               </Select>
             </FormControl>
-
+            <FormControl fullWidth className="mb-4">
+              <label>Choisir Période</label>
+              <Select
+                labelId="select-period-label"
+                value={selectedPeriod}
+                onChange={(e) => setSelectedPeriod(e.target.value as string)}
+                displayEmpty
+              >
+                <MenuItem value="" disabled>Choisir une période</MenuItem>
+                {periodOptions.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
             <div className="flex justify-end mt-6 space-x-4">
               <Button
                 className={"w-44 rounded-2xl border"}

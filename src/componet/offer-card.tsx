@@ -21,7 +21,7 @@ import {
   updateTeacherOfferService,
 } from "../services/teacher-offer";
 import { useLocation } from "react-router-dom";
-// import OfferStudentModal from "./offer-student-modal";
+import OfferStudentModal from "./offer-student-modal";
 import {
   deleteStudentOfferService,
   updateStudentOfferService,
@@ -95,7 +95,7 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
         .then((updatedOffer) => {
           onUpdateOffer(updatedOffer.data);
           handleClose();
-          handleCloseModal();
+          handleCloseEditModal();
           if (snackbarContext) {
             snackbarContext.showMessage(
               "Succes",
@@ -112,7 +112,7 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
         .then((updatedOffer) => {
           onUpdateOffer(updatedOffer.data);
           handleClose();
-          handleCloseModal();
+          handleCloseEditModal();
           if (snackbarContext) {
             snackbarContext.showMessage(
               "Succes",
@@ -128,9 +128,12 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
+  const handleOpenEditModal = () => setIsEditModalOpen(true);
+  const handleCloseEditModal = () => setIsEditModalOpen(false);
   const [open, setOpen] = React.useState(false);
 
   const handleClickAlert = () => {
@@ -192,8 +195,38 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
     }
   };
 
+  const getSubjectMultiplier = () => {
+    // Special multipliers for YEARLY period
+    if (selectedPeriod === 'YEARLY') {
+      switch (subjectCount) {
+        case 1: return 1;
+        case 2: return 1.5;
+        case 3: return 2.25;
+        case 4: return 3;
+        default: return subjectCount;
+      }
+    }
+    // For other periods, 4 subjects = 3.5x
+    if (subjectCount === 4) return 3.5;
+    return subjectCount;
+  };
+
   const getTotalPrice = () => {
-    return getPriceForPeriod() * subjectCount;
+    return Math.floor(getPriceForPeriod() * getSubjectMultiplier());
+  };
+
+  const getOriginalPrice = () => {
+    const monthCount = selectedPeriod === 'MONTHLY' ? 1 : 
+                       selectedPeriod === 'TRIMESTER' ? 3 : 
+                       selectedPeriod === 'SEMESTER' ? 6 : 12;
+    return Math.floor(offer.monthlyPrice * monthCount * getSubjectMultiplier());
+  };
+
+  const hasPromo = () => {
+    if (isFreeOffer || !offer.monthlyPrice) return false;
+    const totalPrice = getTotalPrice();
+    const originalPrice = getOriginalPrice();
+    return totalPrice < originalPrice;
   };
 
   return (
@@ -213,23 +246,12 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
           className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
         />
         
-        {/* Price Badge - Floating */}
-        <div 
-          className="absolute z-20 px-2 py-1 shadow-lg top-2 sm:top-4 left-2 sm:left-4 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl backdrop-blur-md"
-          style={{ 
-            background: `linear-gradient(135deg, ${colors.buttonStart}E6, ${colors.buttonEnd}E6)`,
-          }}
-        >
-          <div className="flex items-baseline text-white">
-            <span className="text-lg font-bold sm:text-2xl">{getTotalPrice()}</span>
-            <span className="ml-1 text-xs font-medium sm:text-sm">DT</span>
-          </div>
-        </div>
+
 
         {/* Subscription Badge */}
         {offer.subscribed && (
           <div 
-            className="absolute z-20 px-2 py-1 text-xs font-bold rounded-full shadow-lg top-2 sm:top-4 right-2 sm:right-4 sm:px-3 backdrop-blur-md"
+            className="absolute z-20 px-2 py-1 text-xs font-bold rounded-full shadow-lg bottom-2 sm:bottom-4 right-2 sm:right-4 sm:px-3 backdrop-blur-md"
             style={{ 
               backgroundColor: `${colors.check}E6`,
               color: 'white'
@@ -241,7 +263,16 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
 
         {/* Free Offer Badge */}
         {isFreeOffer && (
-          <div className="absolute z-20 px-2 py-1 text-xs font-bold text-white rounded-full shadow-lg bottom-2 sm:bottom-4 left-2 sm:left-4 sm:px-3 bg-gradient-to-r from-blue-500 to-blue-600 animate-pulse">
+          <div
+            className="absolute z-20 px-3 py-1 text-xs font-extrabold rounded-full shadow-lg bottom-2 sm:bottom-4 left-2 sm:left-4 sm:px-4 animate-pulse"
+            style={{
+              color: '#fff',
+              letterSpacing: '1px',
+              fontSize: '1rem',
+              background: 'linear-gradient(90deg, #3B82F6 0%, #1D4ED8 100%)',
+              boxShadow: '0 2px 12px 0 rgba(59,130,246,0.25)'
+            }}
+          >
             🎉 مجاني
           </div>
         )}
@@ -250,56 +281,41 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
       {/* Content Container */}
       <div className="relative flex flex-col h-full p-4 sm:p-6">
         {/* Header Section */}
-        <div className="flex items-start justify-between mb-3 sm:mb-5">
-          <div className="flex-1">
-            <div className="flex items-center mb-2">
-              <h2 
-                className="text-lg font-bold leading-tight sm:text-xl"
-                style={{ color: colors.title }}
+        <div className="flex flex-col items-center justify-center mb-3 sm:mb-5">
+          <div className="flex justify-end w-full">
+            {role === "ROLE_ADMIN" && (
+              <IconButton 
+                onClick={handleClick} 
+                className="p-2 transition-colors rounded-full hover:bg-gray-100"
+                style={{ color: colors.icon }}
               >
-                {offer.title}
-              </h2>
-              {role === "ROLE_ADMIN" && (
-                <div className="ml-auto">
-                  <IconButton 
-                    onClick={handleClick} 
-                    className="p-2 transition-colors rounded-full hover:bg-gray-100"
-                    style={{ color: colors.icon }}
-                  >
-                    <MoreVertIcon />
-                  </IconButton>
-                  <Menu
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={handleClose}
-                    anchorOrigin={{
-                      vertical: "top",
-                      horizontal: "right",
-                    }}
-                    transformOrigin={{
-                      vertical: "top",
-                      horizontal: "right",
-                    }}
-                    PaperProps={{
-                      style: {
-                        borderRadius: '12px',
-                        boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
-                      }
-                    }}
-                  >
-                    <MenuItem onClick={handleOpenModal} className="mx-1 my-1 rounded-lg">Modifier</MenuItem>
-                    <MenuItem onClick={handleClickAlert} className="mx-1 my-1 text-red-600 rounded-lg">Supprimer</MenuItem>
-                  </Menu>
-                </div>
-              )}
-            </div>
-            <p 
-              className="text-sm font-medium leading-relaxed"
-              style={{ color: colors.subTitle }}
-            >
-              {offer.subTitle}
-            </p>
+                <MoreVertIcon />
+              </IconButton>
+            )}
           </div>
+          <h2 
+            className="w-full text-lg font-bold leading-tight text-center sm:text-xl"
+            style={{ color: colors.title }}
+          >
+            {offer.title}
+          </h2>
+          {/* Price below title */}
+          <div className="flex flex-col items-center w-full mt-2">
+            <span className="text-2xl font-bold" style={{ color: colors.price }}>{getTotalPrice()} DT</span>
+            {/* Discounted price below price, if promo */}
+            {hasPromo() && (
+              <span className="flex items-center gap-2 mt-1 text-base font-medium" style={{ color: '#EF4444' }}>
+                <span className="ml-1">au lieu de</span>
+                <span className="line-through">{getOriginalPrice()} DT</span>
+              </span>
+            )}
+          </div>
+          <p 
+            className="w-full mt-2 text-sm font-medium leading-relaxed text-center"
+            style={{ color: colors.subTitle }}
+          >
+            {offer.subTitle}
+          </p>
         </div>
 
         {/* Description */}
@@ -336,20 +352,29 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
           {/* Subject Count Selection: only for paid offers */}
           {!isFreeOffer && (
             <div className="flex justify-center w-full mb-2">
-                  {[1, 2, 3, 4].map(count => (
-                    <button
-                      key={count}
-                      className={`flex-1 mx-1 px-3 py-2 text-sm font-bold rounded-lg border transition-all duration-300 ${
-                        subjectCount === count
-                          ? `bg-[${themeColors.paid.border}] text-white border-[${themeColors.paid.border}] shadow`
-                          : `bg-white text-[${themeColors.paid.border}] border-[${themeColors.paid.border}] hover:bg-green-50`
-                      }`}
-                      style={{ minWidth: '60px', borderColor: themeColors.paid.border, backgroundColor: subjectCount === count ? themeColors.paid.border : 'white', color: subjectCount === count ? 'white' : themeColors.paid.border }}
-                      onClick={() => setSubjectCount(count)}
-                    >
-                      <span dir="rtl" style={{ unicodeBidi: 'plaintext', fontFamily: 'inherit' }}>{count === 1 ? 'مادة' : 'مواد'}&nbsp;<b>{count}</b></span>
-                    </button>
-                  ))}
+              {offer.allSubjects ? (
+                <button
+                  className={`flex-1 mx-1 px-3 py-2 text-sm font-bold rounded-lg border transition-all duration-300 bg-[${themeColors.paid.border}] text-white border-[${themeColors.paid.border}] shadow`}
+                  style={{ minWidth: '60px', borderColor: themeColors.paid.border, backgroundColor: themeColors.paid.border, color: 'white' }}
+                >
+                  <span dir="rtl" style={{ unicodeBidi: 'plaintext', fontFamily: 'inherit' }}>كل المواد</span>
+                </button>
+              ) : (
+                Array.from({ length: offer.subjectCount || 4 }, (_, i) => i + 1).map(count => (
+                  <button
+                    key={count}
+                    className={`flex-1 mx-1 px-3 py-2 text-sm font-bold rounded-lg border transition-all duration-300 ${
+                      subjectCount === count
+                        ? `bg-[${themeColors.paid.border}] text-white border-[${themeColors.paid.border}] shadow`
+                        : `bg-white text-[${themeColors.paid.border}] border-[${themeColors.paid.border}] hover:bg-green-50`
+                    }`}
+                    style={{ minWidth: '60px', borderColor: themeColors.paid.border, backgroundColor: subjectCount === count ? themeColors.paid.border : 'white', color: subjectCount === count ? 'white' : themeColors.paid.border }}
+                    onClick={() => setSubjectCount(count)}
+                  >
+                    <span dir="rtl" style={{ unicodeBidi: 'plaintext', fontFamily: 'inherit' }}><b>{count}</b>&nbsp;{count === 1 ? 'مادة' : 'مواد'}</span>
+                  </button>
+                ))
+              )}
             </div>
           )}
         </div>
@@ -477,19 +502,27 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
               <div className="mb-6">
                 <Typography variant="h6" className="mb-3 text-right font-montserrat_medium">عدد المواد</Typography>
                 <div className="flex justify-center gap-2 mb-4">
-                  {[1, 2, 3, 4].map(count => (
+                  {offer.allSubjects ? (
                     <button
-                      key={count}
-                      className={`flex-1 px-3 py-2 text-sm font-bold rounded-lg border transition-all duration-300 ${
-                        subjectCount === count
-                          ? 'bg-primary text-white border-primary shadow'
-                          : 'bg-white text-primary border-primary hover:bg-blue-50'
-                      }`}
-                      onClick={() => setSubjectCount(count)}
+                      className="flex-1 px-3 py-2 text-sm font-bold text-white border rounded-lg shadow bg-primary border-primary"
                     >
-                      <span dir="rtl" style={{ unicodeBidi: 'plaintext', fontFamily: 'inherit' }}>{count === 1 ? 'مادة' : 'مواد'}&nbsp;<b>{count}</b></span>
+                      <span dir="rtl" style={{ unicodeBidi: 'plaintext', fontFamily: 'inherit' }}>كل المواد</span>
                     </button>
-                  ))}
+                  ) : (
+                    Array.from({ length: offer.subjectCount || 4 }, (_, i) => i + 1).map(count => (
+                      <button
+                        key={count}
+                        className={`flex-1 px-3 py-2 text-sm font-bold rounded-lg border transition-all duration-300 ${
+                          subjectCount === count
+                            ? 'bg-primary text-white border-primary shadow'
+                            : 'bg-white text-primary border-primary hover:bg-blue-50'
+                        }`}
+                        onClick={() => setSubjectCount(count)}
+                      >
+                        <span dir="rtl" style={{ unicodeBidi: 'plaintext', fontFamily: 'inherit' }}><b>{count}</b>&nbsp;{count === 1 ? 'مادة' : 'مواد'}</span>
+                      </button>
+                    ))
+                  )}
                 </div>
               </div>
             )}
@@ -497,17 +530,27 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
             {/* Price Summary */}
             <div className="p-4 mb-6 rounded-lg bg-gradient-to-r from-green-50 to-blue-50">
               <div className="flex items-center justify-between mb-2">
-                <span className="font-medium text-gray-700">سعر المادة الواحدة:</span>
+                <span className="font-medium text-gray-700">{offer.allSubjects ? 'السعر:' : 'سعر المادة الواحدة:'}</span>
                 <span className="font-bold text-primary">{getPriceForPeriod()} د.ت</span>
               </div>
               <div className="flex items-center justify-between mb-2">
                 <span className="font-medium text-gray-700">عدد المواد:</span>
-                <span className="font-bold text-primary">{subjectCount}</span>
+                <span className="font-bold text-primary">{offer.allSubjects ? 'كل المواد' : subjectCount}</span>
               </div>
               <hr className="my-2" />
               <div className="flex items-center justify-between">
                 <span className="text-lg font-bold text-gray-800">المجموع:</span>
-                <span className="text-xl font-bold text-green-600">{getTotalPrice()} د.ت</span>
+                <div className="flex flex-col items-end">
+                  <div className="flex items-baseline gap-2">
+                    {hasPromo() && (
+                      <span className="text-base font-medium line-through" style={{ color: '#EF4444' }}>{getOriginalPrice()} د.ت</span>
+                    )}
+                    <span className="text-xl font-bold text-green-600">{getTotalPrice()} د.ت</span>
+                  </div>
+                  {hasPromo() && (
+                    <span className="text-xs font-medium text-green-600">وفّر {getOriginalPrice() - getTotalPrice()} د.ت</span>
+                  )}
+                </div>
               </div>
             </div>
             {/* Payment Upload */}
@@ -591,10 +634,19 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
         </Dialog>
       )}
       {/* Admin/Teacher Modals */}
-      {!isOfferStudent && (
+      {isOfferStudent ? (
+        <OfferStudentModal
+          open={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          initialData={{ image: offer.imageUrl, ...offer }}
+          modalTitle="Modifier l'offre"
+          buttonText="Mettre à jour"
+          onButtonClick={handleAction}
+        />
+      ) : (
         <FormModal
-          open={isModalOpen}
-          onClose={handleCloseModal}
+          open={isEditModalOpen}
+          onClose={handleCloseEditModal}
           initialData={{ image: offer.imageUrl, ...offer }}
           modalTitle="Modifier l'offre"
           buttonText="Mettre à jour"

@@ -23,6 +23,8 @@ interface FormData {
   offerDetails: string;
   classId: number | string;
   requiredEducationLevel?: string;
+  allSubjects?: boolean;
+  subjectCount?: number | string;
 }
 
 const defaultData: FormData = {
@@ -37,6 +39,8 @@ const defaultData: FormData = {
   offerDetails: "",
   classId: "",
   requiredEducationLevel: "",
+  allSubjects: false,
+  subjectCount: "",
 };
   
 const OfferStudentModal: React.FC<FormModalProps> = ({
@@ -110,7 +114,12 @@ const OfferStudentModal: React.FC<FormModalProps> = ({
     if (imageFile) {
       formData.append("image", imageFile);
     }
-    if (!imageFile || sendeData.image) {
+
+    // Check if offer is free (all price fields are 0 or empty)
+    const isFree = [sendeData.monthlyPrice, sendeData.trimesterPrice, sendeData.semesterPrice, sendeData.yearlyPrice]
+      .every(p => !p || Number(p) === 0);
+
+    if (!isFree && (!imageFile && !sendeData.image)) {
       if (snackbarContext) {
         snackbarContext.showMessage(
           "Erreur",
@@ -118,6 +127,7 @@ const OfferStudentModal: React.FC<FormModalProps> = ({
           "error",
         );
       }
+      return;
     }
 
     onButtonClick(formData);
@@ -170,30 +180,38 @@ const OfferStudentModal: React.FC<FormModalProps> = ({
           </h1>
         </div>
 
-        <div className="flex items-center justify-center w-full h-40 my-2 bg-gray-200">
-          <label className="flex flex-col items-center cursor-pointer">
-            {imageFile || sendeData.image ? (
-              <img
-                src={
-                  imageFile ? URL.createObjectURL(imageFile) : sendeData.image
-                }
-                alt="Uploaded"
-                className="object-cover w-40 h-40 rounded-3xl"
-              />
-            ) : (
-              <div className="flex flex-col items-center cursor-pointer">
-                <AddAPhotoIcon />
-                <Typography variant="caption">Add an image</Typography>
-              </div>
-            )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-          </label>
-        </div>
+        {/* Payment Image Upload - Only show if not free */}
+        {(() => {
+          const isFree = [sendeData.monthlyPrice, sendeData.trimesterPrice, sendeData.semesterPrice, sendeData.yearlyPrice]
+            .every(p => !p || Number(p) === 0);
+          if (isFree) return null;
+          return (
+            <div className="flex items-center justify-center w-full h-40 my-2 bg-gray-200">
+              <label className="flex flex-col items-center cursor-pointer">
+                {imageFile || sendeData.image ? (
+                  <img
+                    src={
+                      imageFile ? URL.createObjectURL(imageFile) : sendeData.image
+                    }
+                    alt="Uploaded"
+                    className="object-cover w-40 h-40 rounded-3xl"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center cursor-pointer">
+                    <AddAPhotoIcon />
+                    <Typography variant="caption">Add an image</Typography>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          );
+        })()}
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           <CustomInput
@@ -269,6 +287,28 @@ const OfferStudentModal: React.FC<FormModalProps> = ({
             value={sendeData.requiredEducationLevel || initialEducationLevel?.value}
             onChange={handleSelectChange}
             name="requiredEducationLevel"
+          />
+          <div className="flex items-center mb-5">
+            <input
+              type="checkbox"
+              id="allSubjects"
+              name="allSubjects"
+              checked={sendeData.allSubjects || false}
+              onChange={(e) => setSendeData((prevData) => ({ ...prevData, allSubjects: e.target.checked, subjectCount: e.target.checked ? "" : prevData.subjectCount }))}
+              className="w-4 h-4 bg-gray-100 border-gray-300 rounded text-primary focus:ring-primary focus:ring-2"
+            />
+            <label htmlFor="allSubjects" className="ml-2 text-sm font-medium text-gray-900">
+              All Subjects
+            </label>
+          </div>
+          <CustomInput
+            label="Subject Count"
+            inputType="number"
+            CustomStyle="mb-5"
+            value={sendeData.subjectCount}
+            name="subjectCount"
+            onChange={handleChange}
+            disabled={sendeData.allSubjects || false}
           />
           <div className="w-full">
             <div className="flex items-center justify-between w-full">
