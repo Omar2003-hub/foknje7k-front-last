@@ -423,7 +423,14 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
               onMouseLeave={e => {
                 e.currentTarget.style.background = `linear-gradient(135deg, ${colors.buttonStart}, ${colors.buttonEnd})`;
               }}
-              onClick={handleOpenModal}
+              onClick={() => {
+                // For free offers, call onclick directly without opening modal
+                if (isFreeOffer) {
+                  onclick();
+                } else {
+                  handleOpenModal();
+                }
+              }}
             >
               {/* Button shine effect */}
               <div className="absolute inset-0 transition-transform duration-1000 transform -translate-x-full -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full"></div>

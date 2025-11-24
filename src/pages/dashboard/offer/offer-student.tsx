@@ -12,7 +12,6 @@ import {
 
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import CustomButton from "../../../shared/custom-button/custom-button";
 import OfferCard from "../../../componet/offer-card";
 // import VisibilityIcon from "@mui/icons-material/Visibility";
 import PersonIcon from "@mui/icons-material/Person";
@@ -116,7 +115,12 @@ const OfferStudent = () => {
 
   const handleOfferClick = (offer: any) => {
     setSelectedOffer(offer);
-    if (offer.price === 0) {
+    // Check if it's a free offer using all price fields
+    const isFreeOffer = offer.price === 0 || 
+                        (offer.monthlyPrice === 0 && offer.trimesterPrice === 0 && 
+                         offer.semesterPrice === 0 && offer.yearlyPrice === 0);
+    
+    if (isFreeOffer) {
       setIsConfirmModal(true);
     } else {
       setIsPeriodModalOpen(true);
@@ -355,49 +359,62 @@ const OfferStudent = () => {
           </div>
           <h2 className="text-lg font-semibold text-primary">Chargement des offres...</h2>
         </div>
-      ) : isConfirmModal && selectedOffer && selectedOffer.price === 0 ? (
-        <div className="w-full h-[40vh] flex flex-col items-center justify-center">
-          <div className="w-9/12 mb-10">
-            <h1 className="text-lg text-title lg:text-3xl font-montserrat_semi_bold">
-              Offre gratuite
-            </h1>
-          </div>
-          <div className="flex flex-col items-center w-3/4 p-5 bg-white sm:w-1/2 rounded-3xl">
-            <h1 className="mb-5 text-lg font-montserrat_semi_bold lg:text-3xl text-title">
+      ) : isConfirmModal && selectedOffer ? (
+        <div className="w-full min-h-[40vh] flex flex-col items-center justify-center px-4">
+          <div className="flex flex-col items-center w-full max-w-md p-6 bg-white shadow-xl sm:p-8 rounded-2xl">
+            <div className="mb-6 text-center">
+              <h2 className="mb-2 text-2xl font-bold text-primary">{selectedOffer.title}</h2>
+              <p className="text-lg text-gray-600">Offre gratuite</p>
+            </div>
+            <p className="mb-6 text-center text-gray-700">
               Vous allez rejoindre cette offre gratuitement !
-            </h1>
-            <CustomButton
-              className="w-full h-10 text-white rounded-md bg-primary sm:w-1/3"
-              text={"Confirmer"}
-              onClick={() => {
-                // For free offers, send subjectIds as empty string in query params
-                sendOfferService(selectedOffer.id, {}, "")
-                  .then(() => {
-                    fetchData();
-                    setIsConfirmModal(false);
-                    if (snackbarContext) {
-                      snackbarContext.showMessage(
-                        "Succes",
-                        "Vous avez rejoint l'offre gratuite avec succès",
-                        "success"
-                      );
-                    }
-                    if (selectedOffer.groupId) {
-                      window.location.href = `/dashboard/group/${selectedOffer.groupId}`;
-                    }
-                  })
-                  .catch((e: any) => {
-                    console.log(e);
-                    if (snackbarContext) {
-                      snackbarContext.showMessage(
-                        "Erreur",
-                        "Erreur lors de la souscription à l'offre gratuite",
-                        "error"
-                      );
-                    }
-                  });
-              }}
-            />
+            </p>
+            <div className="flex flex-col w-full gap-3 sm:flex-row sm:gap-4">
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setIsConfirmModal(false);
+                  setSelectedOffer(null);
+                }}
+                className="order-2 w-full px-6 py-3 text-gray-700 border-gray-300 rounded-lg sm:w-auto sm:order-1"
+              >
+                Annuler
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => {
+                  sendOfferService(selectedOffer.id, {}, "")
+                    .then(() => {
+                      fetchData();
+                      setIsConfirmModal(false);
+                      setSelectedOffer(null);
+                      if (snackbarContext) {
+                        snackbarContext.showMessage(
+                          "Succès",
+                          "Vous avez rejoint l'offre gratuite avec succès",
+                          "success"
+                        );
+                      }
+                      if (selectedOffer.groupId) {
+                        window.location.href = `/dashboard/group/${selectedOffer.groupId}`;
+                      }
+                    })
+                    .catch((e: any) => {
+                      console.log(e);
+                      if (snackbarContext) {
+                        snackbarContext.showMessage(
+                          "Erreur",
+                          "Erreur lors de la souscription à l'offre gratuite",
+                          "error"
+                        );
+                      }
+                    });
+                }}
+                className="order-1 w-full px-6 py-3 font-bold text-white rounded-lg bg-primary sm:w-auto sm:order-2"
+              >
+                Confirmer
+              </Button>
+            </div>
           </div>
         </div>
       ) : (

@@ -64,7 +64,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                 </th>
               )}
               {actions && (
-                <th className="p-3 md:font-montserrat_medium font-montserrat_regular text-center whitespace-nowrap border border-gray-300 lg:text-base md:text-sm text-xs">
+                <th className="p-3 md:font-montserrat_medium font-montserrat_regular text-center border border-gray-300 lg:text-base md:text-sm text-xs min-w-[280px]">
                   Actions
                 </th>
               )}
@@ -115,7 +115,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                   </td>
                 )}
                 {actions && (
-                  <td className="p-3 text-center font-montserrat_regular border border-gray-300 lg:text-base md:text-sm text-xs">
+                  <td className="p-3 text-center font-montserrat_regular border border-gray-300 lg:text-base md:text-sm text-xs min-w-[280px]">
                     {actions(row)}
                   </td>
                 )}

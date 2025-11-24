@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useMemo } from "react";
 import CustomTable from "../../../shared/custom-table/custom-table";
 import { columnsStudent } from "../../../mocks/fakeData";
 import {
@@ -11,7 +11,13 @@ import {
   IconButton,
   MenuItem,
   Select,
+  TextField,
+  InputAdornment,
+  Card,
+  CardContent,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import FilterListIcon from "@mui/icons-material/FilterList";
 import {
   getAllStudentFromSuperTeacher,
   getAllUserByRole,
@@ -56,6 +62,12 @@ const ManagementStudent = () => {
   const [selectedGroupForSubject, setSelectedGroupForSubject] = useState<number | null>(null);
   const [filteredSubjectOptions, setFilteredSubjectOptions] = useState<{ label: string; value: number }[]>([]);
   const snackbarContext = useContext(SnackbarContext);
+
+  // Filter and pagination states
+  const [query, setQuery] = useState("");
+  const [groupFilter, setGroupFilter] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const studentsPerPage = 20;
 
   useEffect(() => {
     getAllStudentFromSuperTeacher()
@@ -314,7 +326,7 @@ const ManagementStudent = () => {
   };
 
   const ActionButtons: React.FC<{ row: any }> = ({ row }) => (
-    <div className="flex flex-wrap items-center justify-center gap-2 min-w-fit">
+    <div className="flex items-center justify-center gap-2">
       <button
         style={{ background: '#22c55e', color: '#fff', border: '2px solid #16a34a', fontWeight: 'bold', borderRadius: '9999px', boxShadow: '0 2px 8px rgba(34,197,94,0.2)' }}
         className="px-4 py-2 text-sm whitespace-nowrap"
@@ -352,6 +364,50 @@ const ManagementStudent = () => {
   const renderActions = (row: any) => <ActionButtons row={row} />;
   const renderStatus = (row: any) => <ActionStatus row={row} />;
 
+  // Filter and pagination logic
+  const filtered = useMemo(() => {
+    let result = Array.from(new Map(data.map((item: any) => [item.id, item])).values());
+    
+    // Apply text search filter
+    if (query) {
+      const q = query.toLowerCase();
+      result = result.filter((student: any) => {
+        const fullName = (student.fullName || "").toLowerCase();
+        const email = (student.email || "").toLowerCase();
+        return fullName.includes(q) || email.includes(q);
+      });
+    }
+
+    // Apply group filter
+    if (groupFilter) {
+      result = result.filter((student: any) => {
+        return student.groups?.some((group: any) => group.title === groupFilter);
+      });
+    }
+
+    return result;
+  }, [data, query, groupFilter]);
+
+  // Pagination logic
+  const totalPages = Math.ceil(filtered.length / studentsPerPage);
+  const paginatedStudents = useMemo(() => {
+    const startIdx = (currentPage - 1) * studentsPerPage;
+    return filtered.slice(startIdx, startIdx + studentsPerPage);
+  }, [filtered, currentPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, groupFilter]);
+
+  // Get unique groups for filter dropdown
+  const availableGroups = useMemo<string[]>(() => {
+    const groups = data.flatMap((student: any) => 
+      student.groups?.filter((g: any) => g.superTeacherId === id).map((g: any) => g.title) || []
+    );
+    return Array.from(new Set(groups)).filter(Boolean) as string[];
+  }, [data, id]);
+
   return (
     <div className="w-full p-1 lg:p-10">
       <div className="flex flex-col items-start justify-between w-full mb-5 space-y-4 md:flex-row md:items-center md:space-y-0">
@@ -361,15 +417,129 @@ const ManagementStudent = () => {
         <CustomButton text={"Ajouter éleves"} onClick={handleAddClick} />
       </div>
 
+      {/* Search and Filter Section */}
+      <Card className="mb-6 border-0 shadow-lg">
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
+            <div className="flex flex-col w-full gap-4 sm:flex-row lg:w-auto">
+              {/* Search Input */}
+              <TextField
+                placeholder="Rechercher par nom ou email..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                variant="outlined"
+                size="small"
+                className="w-full sm:w-64"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon className="text-gray-400" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              {/* Group Filter */}
+              <FormControl size="small" className="w-full sm:w-48">
+                <Select
+                  value={groupFilter}
+                  onChange={(e) => setGroupFilter(e.target.value)}
+                  displayEmpty
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <FilterListIcon className="text-gray-400" />
+                    </InputAdornment>
+                  }
+                >
+                  <MenuItem value="">Tous les groupes</MenuItem>
+                  {availableGroups.map((group: string) => (
+                    <MenuItem key={group} value={group}>
+                      {group}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setQuery("");
+                  setGroupFilter("");
+                }}
+                disabled={!query && !groupFilter}
+              >
+                Réinitialiser
+              </Button>
+            </div>
+          </div>
+          
+          {/* Results Summary */}
+          <div className="mt-4 text-sm text-gray-600">
+            Affichage de {paginatedStudents.length} sur {filtered.length} élève(s)
+            {(query || groupFilter) && ` (filtré depuis ${data.length} total)`}
+          </div>
+        </CardContent>
+      </Card>
+
       <CustomTable
         title="Gérer éleves"
         columns={columnsStudent}
         //@ts-ignore
-        data={[...new Map(data.map((item) => [item.id, item])).values()]}
+        data={paginatedStudents}
         actions={renderActions}
         status={renderStatus}
         statusName={"Groups"}
       />
+
+      {/* Pagination Controls */}
+      {filtered.length > 0 && (
+        <Card className="mt-6 border-0 shadow-lg">
+          <CardContent className="p-4">
+            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+              <div className="text-sm text-gray-600">
+                Page {currentPage} sur {totalPages}
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outlined"
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                  size="small"
+                >
+                  Première
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  size="small"
+                >
+                  Précédent
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  size="small"
+                >
+                  Suivant
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => setCurrentPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                  size="small"
+                >
+                  Dernière
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Add Student Dialog */}
       <Dialog
