@@ -176,7 +176,16 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
     }
   };
 
-  const [selectedPeriod, setSelectedPeriod] = useState<'MONTHLY' | 'TRIMESTER' | 'SEMESTER' | 'YEARLY'>('MONTHLY');
+  // Find the first available period with a price > 0
+  const availablePeriods = [
+    { key: 'MONTHLY', label: 'شهري', price: offer.monthlyPrice },
+    { key: 'TRIMESTER', label: 'ثلاثي', price: offer.trimesterPrice },
+    { key: 'SEMESTER', label: 'سداسي', price: offer.semesterPrice },
+    { key: 'YEARLY', label: 'سنوي', price: offer.yearlyPrice }
+  ].filter(({ price }) => price > 0);
+
+  const defaultPeriod = availablePeriods.length > 0 ? availablePeriods[0].key : 'MONTHLY';
+  const [selectedPeriod, setSelectedPeriod] = useState<'MONTHLY' | 'TRIMESTER' | 'SEMESTER' | 'YEARLY'>(defaultPeriod as any);
   const [subjectCount, setSubjectCount] = useState(1);
   const [paymentFile, setPaymentFile] = useState<File | null>(null);
 
@@ -194,6 +203,9 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
         return offer.monthlyPrice;
     }
   };
+
+  // Helper to check if price is valid (not null/undefined and not NaN)
+  const isValidPrice = (price: any) => price !== undefined && price !== null && !isNaN(price) && price !== '';
 
   const getSubjectMultiplier = () => {
     // Special multipliers for YEARLY period
@@ -301,7 +313,13 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
           </h2>
           {/* Price below title */}
           <div className="flex flex-col items-center w-full mt-2">
-            <span className="text-2xl font-bold" style={{ color: colors.price }}>{getTotalPrice()} DT</span>
+            <span className="text-2xl font-bold" style={{ color: colors.price }}>
+              {isValidPrice(getTotalPrice()) && getTotalPrice() > 0
+                ? `${getTotalPrice()} DT`
+                : (isValidPrice(getTotalPrice()) && getTotalPrice() === 0 && isValidPrice(offer.monthlyPrice))
+                  ? '0 DT'
+                  : '--'}
+            </span>
             {/* Discounted price below price, if promo */}
             {hasPromo() && (
               <span className="flex items-center gap-2 mt-1 text-base font-medium" style={{ color: '#EF4444' }}>
@@ -329,12 +347,7 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
         <div className="flex flex-col items-center mb-3 sm:mb-5">
           {/* Period Selection */}
           <div className="flex justify-center w-full mb-3">
-            {[
-              { key: 'MONTHLY', label: 'شهري', price: offer.monthlyPrice },
-              { key: 'TRIMESTER', label: 'ثلاثي', price: offer.trimesterPrice },
-              { key: 'SEMESTER', label: 'سداسي', price: offer.semesterPrice },
-              { key: 'YEARLY', label: 'سنوي', price: offer.yearlyPrice }
-            ].filter(({ price }) => price > 0).map(({ key, label }) => (
+            {availablePeriods.map(({ key, label }) => (
               <button
                 key={key}
                 className={`flex-1 mx-1 px-3 py-2 text-sm font-bold rounded-lg border transition-all duration-300 ${
