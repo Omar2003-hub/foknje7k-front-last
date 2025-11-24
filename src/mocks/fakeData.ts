@@ -13,6 +13,7 @@ export const columnsStudent = [
   { Header: "Nom", accessor: "fullName" },
   { Header: "email", accessor: "email" },
   { Header: "phoneNumber", accessor: "phoneNumber" },
+  { Header: "Abonnement", accessor: "isSubscriptionActive" }, // Use correct field name
 ];
 
 export const columnsRequests = [

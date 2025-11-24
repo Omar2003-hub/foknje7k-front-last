@@ -68,6 +68,8 @@ const ManagementStudent = () => {
   const [groupFilter, setGroupFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const studentsPerPage = 20;
+  // Subscription filter: '', 'active', 'inactive'
+  const [subscriptionFilter, setSubscriptionFilter] = useState<string>("");
 
   useEffect(() => {
     getAllStudentFromSuperTeacher()
@@ -350,16 +352,19 @@ const ManagementStudent = () => {
       </button>
     </div>
   );
-  const ActionStatus: React.FC<{ row: any }> = ({ row }) => (
-    <div className="flex items-center justify-center space-x-2">
-      <div>
-        {row?.groups
-          ?.filter((item: any) => item.superTeacherId === id)
-          .map((group: any) => group.title)
-          .join(" ,  ")}
+  const ActionStatus: React.FC<{ row: any }> = ({ row }) => {
+    // Only show group titles, not subscription status
+    return (
+      <div className="flex items-center justify-center space-x-2">
+        <div>
+          {row?.groups
+            ?.filter((item: any) => item.superTeacherId === id)
+            .map((group: any) => group.title)
+            .join(" ,  ")}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderActions = (row: any) => <ActionButtons row={row} />;
   const renderStatus = (row: any) => <ActionStatus row={row} />;
@@ -367,7 +372,7 @@ const ManagementStudent = () => {
   // Filter and pagination logic
   const filtered = useMemo(() => {
     let result = Array.from(new Map(data.map((item: any) => [item.id, item])).values());
-    
+
     // Apply text search filter
     if (query) {
       const q = query.toLowerCase();
@@ -385,8 +390,15 @@ const ManagementStudent = () => {
       });
     }
 
+    // Apply subscription filter
+    if (subscriptionFilter === "active") {
+      result = result.filter((student: any) => student.isSubscriptionActive === true);
+    } else if (subscriptionFilter === "inactive") {
+      result = result.filter((student: any) => student.isSubscriptionActive === false);
+    }
+
     return result;
-  }, [data, query, groupFilter]);
+  }, [data, query, groupFilter, subscriptionFilter]);
 
   // Pagination logic
   const totalPages = Math.ceil(filtered.length / studentsPerPage);
@@ -421,6 +433,7 @@ const ManagementStudent = () => {
       <Card className="mb-6 border-0 shadow-lg">
         <CardContent className="p-6">
           <div className="flex flex-col items-center justify-between gap-4 lg:flex-row">
+
             <div className="flex flex-col w-full gap-4 sm:flex-row lg:w-auto">
               {/* Search Input */}
               <TextField
@@ -457,6 +470,19 @@ const ManagementStudent = () => {
                       {group}
                     </MenuItem>
                   ))}
+                </Select>
+              </FormControl>
+
+              {/* Subscription Status Filter */}
+              <FormControl size="small" className="w-full sm:w-48">
+                <Select
+                  value={subscriptionFilter}
+                  onChange={(e) => setSubscriptionFilter(e.target.value)}
+                  displayEmpty
+                >
+                  <MenuItem value="">Tous les abonnements</MenuItem>
+                  <MenuItem value="active">Abonnés actifs</MenuItem>
+                  <MenuItem value="inactive">Non abonnés</MenuItem>
                 </Select>
               </FormControl>
             </div>
