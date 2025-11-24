@@ -661,6 +661,20 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
         />
       )}
       
+      {/* Admin Menu */}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        <MenuItem onClick={() => { handleClose(); handleOpenEditModal(); }}>
+          Modifier
+        </MenuItem>
+        <MenuItem onClick={handleClickAlert}>
+          Supprimer
+        </MenuItem>
+      </Menu>
+
       {/* Delete Confirmation Dialog */}
       <Dialog
         open={open}
