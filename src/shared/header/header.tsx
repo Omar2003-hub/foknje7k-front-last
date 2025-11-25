@@ -113,13 +113,13 @@ const Header: React.FC = () => {
   }, []);
 
   const handleLogout = () => {
-    navigation("/");
     localStorage.clear();
     dispatch(logOut());
     dispatch(clearUserData());
     setDropdownOpen(false);
     setDropdownMobileOpen(false);
     setIsMobileMenuOpen(false);
+    navigation("/");
   };
 
 
@@ -168,7 +168,7 @@ const Header: React.FC = () => {
       {!isLogged && (
         <button
           onClick={toggleMobileMenu}
-          className="lg:hidden p-2 ml-auto mr-4 text-primary hover:text-primary/80 transition-colors z-30"
+          className="z-30 p-2 ml-auto mr-4 transition-colors lg:hidden text-primary hover:text-primary/80"
           aria-label="Toggle mobile menu"
         >
           {isMobileMenuOpen ? (

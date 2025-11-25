@@ -35,6 +35,7 @@ import ManagementUsers from "./pages/dashboard/management-users/management-users
 import PaymentReturn from "./pages/api/payment/return";
 import PaymentCancel from "./pages/api/payment/cancel";
 import PaymentWebhook from "./pages/api/payment/webhook";
+import ConfirmEmail from "./pages/auth/confirm-email/confirm-email";
 
 // Simple NotFound page
 function NotFound() {
@@ -100,6 +101,7 @@ function App() {
             path="/verification-code/:email"
             element={<VerificationCode />}
           />
+          <Route path="/confirm-email" element={<ConfirmEmail />} />
           
           {/* Payment Routes */}
             <Route path="/api/payment/return" element={<PaymentReturn />} />

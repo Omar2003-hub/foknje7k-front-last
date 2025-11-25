@@ -46,6 +46,36 @@ export const forgetPassword = async (email: any) => {
   });
   return response.data;
 };
+
+export const confirmEmail = async (email: string, code: string) => {
+  const response = await NetworkService.getInstance().sendHttpRequest({
+    url: "auth/confirm",
+    method: "POST",
+    withLoader: true,
+    withFailureLogs: false,
+    params: {
+      email: email,
+      code: code,
+    },
+  });
+  return response.data;
+};
+
+export const resendConfirmationCode = async (email: string) => {
+  const response = await NetworkService.getInstance().sendHttpRequest({
+    url: "auth/resend-confirmation-code",
+    method: "POST",
+    withLoader: false,
+    withFailureLogs: false,
+    params: {
+      email: email,
+    },
+  });
+  return response.data;
+};
+
+
+
 export const ResetPassword = async (
   token: string,
   email: string,

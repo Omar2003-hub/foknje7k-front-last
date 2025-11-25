@@ -155,10 +155,11 @@ const Register = () => {
           if (snackbarContext)
             snackbarContext.showMessage(
               "Success",
-              "Inscription réussie, veille confirmer votre email",
+              "Inscription réussie, veuillez confirmer votre email",
               "success"
             );
-          navigate("/login");
+          // Redirect to confirm email page with email pre-filled
+          navigate(`/confirm-email?email=${encodeURIComponent(formData.email)}`);
         })
         .catch((e) => {
           console.log(e);

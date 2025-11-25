@@ -5,7 +5,7 @@ import MailOutlineOutlinedIcon from "@mui/icons-material/MailOutlineOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import CustomButton from "../../../shared/custom-button/custom-button";
 import { useNavigate } from "react-router-dom";
-import { loginService } from "../../../services/auth-service";
+import { loginService, resendConfirmationCode } from "../../../services/auth-service";
 import { useDispatch } from "react-redux";
 import { logIn } from "../../../redux/store/isLogged-slices";
 import { setUserData } from "../../../redux/store/userData-slices";
@@ -112,18 +112,39 @@ const Login = () => {
         localStorage.setItem("token", res.data.accessToken);
       })
       .catch((e) => {
-        if(e.response.data.errors[0] === "Le compte utilisateur est désactivé") {
-          if(snackbarContext) {
-            snackbarContext.showMessage("Erreur", "Verifier votre email pour activer votre compte", "error");
-            navigation("/login");
+        const errorMsg = e?.response?.data?.errors?.[0] || "Erreur inconnue";
+        const errorMessageField = e?.response?.data?.message || "";
+        const isDisabled =
+          errorMsg === "Le compte utilisateur est désactivé" ||
+          errorMsg === "User is disabled" ||
+          errorMessageField.toLowerCase().includes("disabled");
+        if (isDisabled) {
+          if (snackbarContext) {
+            snackbarContext.showMessage("Erreur", "Veuillez confirmer votre email pour activer votre compte", "error");
+            // Only redirect if email is present and valid
+            if (formData.email && /\S+@\S+\.\S+/.test(formData.email)) {
+              // Resend confirmation code automatically
+              resendConfirmationCode(formData.email)
+                .then(() => {
+                  snackbarContext.showMessage("Info", "Un nouveau code de confirmation a été envoyé à votre email", "info");
+                })
+                .catch(() => {
+                  // Silently fail, user can still manually resend from confirm-email page
+                });
+              setTimeout(() => {
+                navigation(`/confirm-email?email=${encodeURIComponent(formData.email)}`);
+              }, 2000);
+            }
           }
-        }
-        if(e.response.data.errors[0] === "Bad credentials") {
-          if(snackbarContext) {
+        } else if (errorMsg === "Bad credentials") {
+          if (snackbarContext) {
             snackbarContext.showMessage("Erreur", "Email ou mot de passe incorrect", "error");
           }
+        } else {
+          if (snackbarContext) {
+            snackbarContext.showMessage("Erreur", errorMsg, "error");
+          }
         }
-        
       });
 
 
