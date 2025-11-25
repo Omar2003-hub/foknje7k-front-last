@@ -643,8 +643,21 @@ const SubjectDetails = () => {
                   .map((item) => (
                     <div
                       key={item.id}
-                      className="relative p-4 transition-all duration-300 border border-gray-200 group bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:shadow-lg"
+                      className="relative p-4 transition-all duration-300 border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl hover:shadow-lg"
                     >
+                      {canManageChapters && (
+                        <button
+                          onClick={() => handleDeleteFileClick(
+                            item.id,
+                            statusToTypeMap[activeStatus]
+                          )}
+                          className="absolute z-20 flex items-center justify-center rounded-full shadow top-2 right-2 w-7 h-7 hover:opacity-80"
+                          aria-label="Supprimer"
+                          style={{lineHeight: 1, padding: 0, border: 'none', background: '#09745f'}}
+                        >
+                          <FontAwesomeIcon icon={faTrash} className="text-xs text-white" />
+                        </button>
+                      )}
                       {activeStatus === "videos" ? (
                         <div 
                           className="cursor-pointer"
@@ -690,7 +703,7 @@ const SubjectDetails = () => {
                             item.id, 
                             statusToTypeMap[activeStatus]
                           )}
-                          className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-600 transition-all duration-200"
+                          className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all duration-200 z-10"
                           aria-label="Supprimer"
                         >
                           <FontAwesomeIcon icon={faTrash} className="text-xs" />
