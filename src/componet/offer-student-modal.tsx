@@ -25,6 +25,7 @@ interface FormData {
   requiredEducationLevel?: string;
   allSubjects?: boolean;
   subjectCount?: number | string;
+  promoCode?: string;
 }
 
 const defaultData: FormData = {
@@ -41,6 +42,7 @@ const defaultData: FormData = {
   requiredEducationLevel: "",
   allSubjects: false,
   subjectCount: "",
+  promoCode: "",
 };
   
 const OfferStudentModal: React.FC<FormModalProps> = ({
@@ -106,10 +108,10 @@ const OfferStudentModal: React.FC<FormModalProps> = ({
     const { image, ...selectedUser } = sendeData;
 
     const offerDetails = benefits.join(" \n ");
-
+    // Add promoCode to the payload if present
     formData.append(
       "studentOfferDTOJson",
-      JSON.stringify({ ...selectedUser, offerDetails }),
+      JSON.stringify({ ...selectedUser, offerDetails, promoCode: sendeData.promoCode }),
     );
     if (imageFile) {
       formData.append("image", imageFile);
@@ -214,6 +216,14 @@ const OfferStudentModal: React.FC<FormModalProps> = ({
         })()}
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <CustomInput
+            label="Promo Code (optional)"
+            inputType="text"
+            CustomStyle="mb-5"
+            value={sendeData.promoCode || ""}
+            name="promoCode"
+            onChange={handleChange}
+          />
           <CustomInput
             label="Title"
             inputType="text"

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   Button,
   Dialog,
@@ -11,6 +11,7 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
+import UploadFileIcon from "@mui/icons-material/UploadFile";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import FormModal from "./offerModal";
@@ -26,6 +27,7 @@ import {
   deleteStudentOfferService,
   updateStudentOfferService,
   sendOfferService,
+  validatePromoCode as validatePromoCodeService,
 } from "../services/student-offer";
 import { SnackbarContext } from "../config/hooks/use-toast";
 import "./cards.css";
@@ -36,9 +38,8 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
   const isOfferStudent = location.pathname.includes("offer-student");
   const snackbarContext = useContext(SnackbarContext);
 
-  const role = useSelector(
-    (state: RootState) => state?.user?.userData?.role.name,
-  );
+  const userData = useSelector((state: RootState) => state?.user?.userData);
+  const role = userData?.role?.name;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   
   const isFreeOffer =
@@ -188,6 +189,12 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
   const [selectedPeriod, setSelectedPeriod] = useState<'MONTHLY' | 'TRIMESTER' | 'SEMESTER' | 'YEARLY'>(defaultPeriod as any);
   const [subjectCount, setSubjectCount] = useState(1);
   const [paymentFile, setPaymentFile] = useState<File | null>(null);
+  const [promoCode, setPromoCode] = useState("");
+  const [promoError, setPromoError] = useState("");
+  const [discountedTotal, setDiscountedTotal] = useState<number|null>(null);
+  const [discountPercent, setDiscountPercent] = useState<number | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const getPriceForPeriod = () => {
     switch (selectedPeriod) {
@@ -223,23 +230,47 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
     return subjectCount;
   };
 
+  const getBaseTotalPrice = () => {
+    const periodPrice = Number(getPriceForPeriod()) || 0;
+    return Math.floor(periodPrice * Number(getSubjectMultiplier()));
+  };
+
+  const getReferencePrice = () => {
+    const monthCount =
+      selectedPeriod === "MONTHLY"
+        ? 1
+        : selectedPeriod === "TRIMESTER"
+          ? 3
+          : selectedPeriod === "SEMESTER"
+            ? 6
+            : 12;
+    const monthlyPrice = Number(offer.monthlyPrice) || 0;
+    return Math.floor(monthlyPrice * monthCount * Number(getSubjectMultiplier()));
+  };
+
+  const getCurrentPrice = () => discountedTotal ?? getBaseTotalPrice();
+
   const getTotalPrice = () => {
-    return Math.floor(getPriceForPeriod() * getSubjectMultiplier());
+    if (discountedTotal !== null) return discountedTotal;
+    return getBaseTotalPrice();
   };
 
-  const getOriginalPrice = () => {
-    const monthCount = selectedPeriod === 'MONTHLY' ? 1 : 
-                       selectedPeriod === 'TRIMESTER' ? 3 : 
-                       selectedPeriod === 'SEMESTER' ? 6 : 12;
-    return Math.floor(offer.monthlyPrice * monthCount * getSubjectMultiplier());
-  };
-
-  const hasPromo = () => {
-    if (isFreeOffer || !offer.monthlyPrice) return false;
-    const totalPrice = getTotalPrice();
-    const originalPrice = getOriginalPrice();
-    return totalPrice < originalPrice;
-  };
+  // Recalculate discounts when the base price changes (period/subjects)
+  useEffect(() => {
+    if (discountPercent !== null) {
+      const baseTotal = getBaseTotalPrice();
+      const discount = baseTotal * (discountPercent / 100);
+      setDiscountedTotal(Math.max(0, Math.round(baseTotal - discount)));
+    }
+  }, [
+    discountPercent,
+    selectedPeriod,
+    subjectCount,
+    offer.monthlyPrice,
+    offer.trimesterPrice,
+    offer.semesterPrice,
+    offer.yearlyPrice,
+  ]);
 
   return (
     <div 
@@ -314,17 +345,21 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
           {/* Price below title */}
           <div className="flex flex-col items-center w-full mt-2">
             <span className="text-2xl font-bold" style={{ color: colors.price }}>
-              {isValidPrice(getTotalPrice()) && getTotalPrice() > 0
-                ? `${getTotalPrice()} DT`
-                : (isValidPrice(getTotalPrice()) && getTotalPrice() === 0 && isValidPrice(offer.monthlyPrice))
+              {isValidPrice(getCurrentPrice()) && getCurrentPrice() > 0
+                ? `${getCurrentPrice()} DT`
+                : (isValidPrice(getCurrentPrice()) && getCurrentPrice() === 0 && isValidPrice(offer.monthlyPrice))
                   ? '0 DT'
                   : '--'}
             </span>
-            {/* Discounted price below price, if promo */}
-            {hasPromo() && (
+            {/* Show reference price (e.g., monthly * months) when current is discounted */}
+            {(() => {
+              const reference = getReferencePrice();
+              const current = getCurrentPrice();
+              return !isFreeOffer && isValidPrice(reference) && current < reference;
+            })() && (
               <span className="flex items-center gap-2 mt-1 text-base font-medium" style={{ color: '#EF4444' }}>
                 <span className="ml-1">au lieu de</span>
-                <span className="line-through">{getOriginalPrice()} DT</span>
+                <span className="line-through">{getReferencePrice()} DT</span>
               </span>
             )}
           </div>
@@ -562,93 +597,168 @@ const OfferCard = ({ offer, onclick, onUpdateOffer, onDeleteOffer }) => {
                 <span className="text-lg font-bold text-gray-800">المجموع:</span>
                 <div className="flex flex-col items-end">
                   <div className="flex items-baseline gap-2">
-                    {hasPromo() && (
-                      <span className="text-base font-medium line-through" style={{ color: '#EF4444' }}>{getOriginalPrice()} د.ت</span>
+                    {(() => {
+                      const reference = getReferencePrice();
+                      const current = getTotalPrice();
+                      return !isFreeOffer && isValidPrice(reference) && current < reference;
+                    })() && (
+                      <span className="text-base font-medium line-through" style={{ color: '#EF4444' }}>{getReferencePrice()} د.ت</span>
                     )}
                     <span className="text-xl font-bold text-green-600">{getTotalPrice()} د.ت</span>
                   </div>
-                  {hasPromo() && (
-                    <span className="text-xs font-medium text-green-600">وفّر {getOriginalPrice() - getTotalPrice()} د.ت</span>
+                  {(() => {
+                    const reference = getReferencePrice();
+                    const current = getTotalPrice();
+                    return !isFreeOffer && isValidPrice(reference) && current < reference;
+                  })() && (
+                    <span className="text-xs font-medium text-green-600">وفّر {getReferencePrice() - getTotalPrice()} د.ت</span>
                   )}
                 </div>
               </div>
             </div>
-            {/* Payment Upload */}
-            <div className="p-4 mb-6 rounded-lg bg-gray-50">
-              <Typography variant="h6" className="mb-4 text-right font-montserrat_semi_bold">صورة الدفع</Typography>
-              <div className="flex flex-col items-center justify-center w-full h-32 transition-colors border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
-                onClick={() => document.getElementById('payment-file-input')?.click()}
-              >
-                <div className="flex flex-col items-center justify-center px-4">
-                  <MoreVertIcon className="w-8 h-8 mb-2 text-gray-500" />
-                  <p className="mb-1 text-sm text-center text-gray-500">
-                    <span className="font-semibold">اضغط لرفع صورة الدفع</span>
-                  </p>
-                  <p className="text-xs text-center text-gray-500">JPG, PNG أو PDF (حد أقصى 5MB)</p>
-                </div>
+            {/* Promo Code Input */}
+            <div className="mb-6">
+              <label htmlFor="promo-code-input" className="block mb-2 text-base font-bold text-primary">كود التخفيض (اختياري)</label>
+              <input
+                id="promo-code-input"
+                type="text"
+                value={promoCode}
+                onChange={async e => {
+                  const code = e.target.value;
+                  setPromoCode(code);
+                  setPromoError("");
+                  setDiscountedTotal(null);
+                  setDiscountPercent(null);
+                  if (!code) return;
+                  setPromoLoading(true);
+                  try {
+                    const res = await validatePromoCodeService(code, offer.id, userData?.id || "");
+                    const validation = res?.data ?? res;
+                    const discountValue = Number(validation?.discountPercentage);
+                    if (validation?.isValid && !isNaN(discountValue)) {
+                      // Debug log
+                      const baseTotal = getBaseTotalPrice();
+                      const discount = baseTotal * (discountValue / 100);
+                      console.log('[PROMO DEBUG]', {
+                        code,
+                        baseTotal,
+                        subjectCount,
+                        priceForPeriod: getPriceForPeriod(),
+                        subjectMultiplier: getSubjectMultiplier(),
+                        discountPercentage: discountValue,
+                        discount,
+                        discountedTotal: Math.max(0, Math.round(baseTotal - discount))
+                      });
+                      setDiscountPercent(discountValue);
+                      setDiscountedTotal(Math.max(0, Math.round(baseTotal - discount)));
+                      setPromoError("");
+                    } else {
+                      setPromoError("كود التخفيض غير صالح أو منتهي الصلاحية");
+                      setDiscountedTotal(null);
+                      setDiscountPercent(null);
+                    }
+                  } catch (err) {
+                    setPromoError("حدث خطأ أثناء التحقق من الكود");
+                    setDiscountedTotal(null);
+                    setDiscountPercent(null);
+                  } finally {
+                    setPromoLoading(false);
+                  }
+                }}
+                placeholder="ادخل كود التخفيض هنا"
+                className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 text-lg font-semibold bg-yellow-50 ${promoError ? 'border-red-500 focus:ring-red-500' : 'border-primary focus:ring-primary'}`}
+                style={{ letterSpacing: '0.1em' }}
+                disabled={promoLoading}
+              />
+              {promoLoading && <div className="mt-1 text-xs text-gray-500">جاري التحقق من الكود...</div>}
+              {promoError && <div className="mt-1 text-xs font-bold text-red-600">{promoError}</div>}
+              <div className="mt-4">
                 <input
+                  id="payment-proof"
                   type="file"
-                  id="payment-file-input"
-                  className="hidden"
                   onChange={e => setPaymentFile(e.target.files?.[0] || null)}
                   accept="image/*,.pdf"
+                  className="hidden"
                 />
+                <label
+                  htmlFor="payment-proof"
+                  className="flex items-center justify-between w-full px-4 py-3 transition border-2 border-dashed cursor-pointer rounded-xl hover:border-primary hover:bg-primary/5"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary">
+                      <UploadFileIcon fontSize="medium" />
+                    </div>
+                    <div className="flex flex-col text-sm">
+                      <span className="font-semibold text-gray-800">أرفق وصل الدفع</span>
+                      <span className="text-gray-500">صورة أو PDF بحد أقصى 5MB</span>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 text-sm font-bold text-white rounded-lg bg-primary">اختيار ملف</span>
+                </label>
+                {paymentFile && (
+                  <div className="flex items-center justify-between p-3 mt-3 border border-green-200 rounded-lg bg-green-50">
+                    <div className="flex items-center gap-2 text-sm font-medium text-green-700">
+                      <span className="text-green-600">✓</span>
+                      <span>{paymentFile.name}</span>
+                    </div>
+                    <button
+                      className="text-xs font-semibold text-red-500 hover:underline"
+                      onClick={() => setPaymentFile(null)}
+                      type="button"
+                    >
+                      إزالة
+                    </button>
+                  </div>
+                )}
               </div>
-              {paymentFile && (
-                <div className="p-3 mt-3 border border-green-200 rounded-lg bg-green-50">
-                  <p className="text-sm font-medium text-green-700">✓ تم اختيار الملف: {paymentFile.name}</p>
-                </div>
-              )}
             </div>
           </DialogContent>
           <DialogActions className="px-6 pb-6">
-            <Button 
-              variant="outlined" 
-              onClick={handleCloseModal} 
-              className="px-6 py-2 text-gray-700 border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              إلغاء
-            </Button>
             <Button
-              variant="contained"
-              onClick={() => {
-                // Submit student subscription request
-                const formData = new FormData();
-                formData.append("selectedPeriod", selectedPeriod);
-                formData.append("requestedSubjectsCount", String(subjectCount));
-                if (paymentFile) formData.append("paymentImage", paymentFile);
-                
-                // Call backend API to submit the subscription request
-                sendOfferService(offer.id, formData)
-                  .then((response) => {
-                    if (snackbarContext) {
-                      snackbarContext.showMessage(
-                        "نجح",
-                        "تم إرسال طلب الاشتراك بنجاح",
-                        "success"
-                      );
-                    }
-                    handleCloseModal();
-                    // Reset form
-                    setSelectedPeriod('MONTHLY');
-                    setSubjectCount(1);
-                    setPaymentFile(null);
-                  })
-                  .catch((error) => {
-                    console.error(error);
-                    if (snackbarContext) {
-                      snackbarContext.showMessage(
-                        "خطأ",
-                        "فشل إرسال طلب الاشتراك",
-                        "error"
-                      );
-                    }
-                  });
+              onClick={async () => {
+                if (!paymentFile || subjectCount < 1) return;
+                setSubmitLoading(true);
+                try {
+                  const formData = new FormData();
+                  formData.append("selectedPeriod", selectedPeriod);
+                  formData.append("requestedSubjectsCount", subjectCount.toString());
+                  formData.append("finalPrice", getTotalPrice().toString());
+                  if (promoCode) formData.append("promoCode", promoCode);
+                  formData.append("paymentImage", paymentFile);
+
+                  await sendOfferService(offer.id, formData);
+
+                  if (snackbarContext) {
+                    snackbarContext.showMessage(
+                      "نجح",
+                      "تم إرسال طلب الاشتراك بنجاح",
+                      "success"
+                    );
+                  }
+                  handleCloseModal();
+                  setSelectedPeriod('MONTHLY');
+                  setSubjectCount(1);
+                  setPaymentFile(null);
+                  setPromoCode("");
+                  setDiscountedTotal(null);
+                  setDiscountPercent(null);
+                } catch (error) {
+                  console.error(error);
+                  if (snackbarContext) {
+                    snackbarContext.showMessage(
+                      "خطأ",
+                      "فشل إرسال طلب الاشتراك",
+                      "error"
+                    );
+                  }
+                } finally {
+                  setSubmitLoading(false);
+                }
               }}
-              disabled={!paymentFile || subjectCount < 1}
+              disabled={!paymentFile || subjectCount < 1 || submitLoading}
               className="px-6 py-2 ml-3 font-bold text-white rounded-lg bg-primary hover:bg-primary-dark disabled:opacity-50"
             >
-              تأكيد و إرسال ({getTotalPrice()} د.ت)
+              {submitLoading ? "جاري الإرسال..." : `تأكيد و إرسال (${getTotalPrice()} د.ت)`}
             </Button>
           </DialogActions>
         </Dialog>

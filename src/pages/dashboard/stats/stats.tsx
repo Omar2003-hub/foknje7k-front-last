@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+
 import { getStatsFromIDB, setStatsToIDB } from '../../../utils/idbStats';
 import { BoxStat, MontantStat, TotalStat, UserStat } from "../../../assets/svg";
 import { getStatService } from "../../../services/playList-service";
@@ -28,6 +30,7 @@ const MiniStat: React.FC<{
 
 const Stats: React.FC = () => {
   const [data, setData] = useState<any>(null);
+  const userId = useSelector((state: any) => state.user?.userData?.id);
 
   const CACHE_MAX_AGE = 10 * 60 * 1000; // 10 minutes
   const [loading, setLoading] = useState(false);
@@ -60,6 +63,7 @@ const Stats: React.FC = () => {
 
   return (
     <div className="p-6">
+
       <div className="mx-auto max-w-7xl">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Statistiques</h1>

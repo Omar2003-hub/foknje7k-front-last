@@ -62,6 +62,7 @@ const sidebarLinks: SidebarLink[] = [
   { path: "/requests-prof", name: "Demandes des Professeurs", roles: ["ROLE_ADMIN"] },
   { path: "/requests-student", name: "Demandes des Élèves", roles: ["ROLE_ADMIN"] },
   { path: "/stats", name: "Statistiques", roles: ["ROLE_ADMIN"] },
+  { path: "/referral-code", name: "Referral Code", roles: ["ROLE_ADMIN", "ROLE_SUPER_TEACHER", "ROLE_TEACHER", "ROLE_STUDENT"] },
 ];
 
 // Function to get icon by text

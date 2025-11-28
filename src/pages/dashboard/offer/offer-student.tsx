@@ -52,6 +52,7 @@ const OfferStudent = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'MONTHLY' | 'TRIMESTER' | 'SEMESTER' | 'YEARLY'>('MONTHLY');
   const [paymentFile, setPaymentFile] = useState<File | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'online' | 'upload'>('upload'); // Default to upload only
+  const [promoCode, setPromoCode] = useState("");
   
   const snackbarContext = useContext(SnackbarContext);
 
@@ -154,11 +155,14 @@ const OfferStudent = () => {
     const formData = new FormData();
     formData.append("selectedPeriod", selectedPeriod);
     formData.append("paymentMethod", paymentMethod);
+    if (promoCode) {
+      formData.append("promoCode", promoCode);
+    }
     if (paymentMethod === 'upload' && paymentFile) {
       formData.append("paymentImage", paymentFile);
     }
 
-    // Send request with selectedPeriod only
+    // Send request with selectedPeriod and promoCode
     sendOfferService(selectedOffer.id, formData, "")
       .then((res) => {
         setIsPeriodModalOpen(false);
@@ -256,13 +260,30 @@ const OfferStudent = () => {
       >
         <DialogTitle className="flex items-center justify-between text-white bg-primary">
           <span className="text-xl font-montserrat_semi_bold">
-            Sélectionnez la période
+            طلب الإشتراك
           </span>
           <IconButton onClick={handleClosePeriodModal} className="text-white">
             <CloseIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent className="px-4 py-6">
+          {/* Promo Code Input - moved to top and made prominent */}
+          <div className="mb-8" ref={el => {
+            if (el && isPeriodModalOpen) {
+              setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+            }
+          }}>
+            <label htmlFor="promo-code-input" className="block mb-2 text-base font-bold text-primary">Code Promo (optionnel)</label>
+            <input
+              id="promo-code-input"
+              type="text"
+              value={promoCode}
+              onChange={e => setPromoCode(e.target.value)}
+              placeholder="Entrez votre code promo ici"
+              className="w-full px-4 py-3 border-2 border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-lg font-semibold bg-yellow-50"
+              style={{ letterSpacing: '0.1em' }}
+            />
+          </div>
           <div className="mb-6">
             <Typography variant="h6" className="mb-3 font-montserrat_medium">
               Choisissez la période d'abonnement

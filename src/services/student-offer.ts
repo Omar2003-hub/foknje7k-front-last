@@ -1,4 +1,16 @@
+
 import NetworkService from "../config/interceptor/interceptor";
+// Validate promo code for student offer
+export const validatePromoCode = async (code: string, offerId: number, userId: string) => {
+  const response = await NetworkService.getInstance().sendHttpRequest({
+    url: `promo-codes/validate`,
+    method: "POST",
+    params: { code, offerId, userId },
+    withLoader: false,
+    withFailureLogs: false,
+  });
+  return response.data;
+};
 
 export const createStudentOfferService = async (data: any) => {
   const response = await NetworkService.getInstance().sendHttpRequest({

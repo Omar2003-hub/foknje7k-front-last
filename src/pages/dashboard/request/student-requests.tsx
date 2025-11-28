@@ -35,6 +35,8 @@ interface RequestData {
   subjects: string;
   subjectCount: number;
   totalPrice: string;
+  paidAmount?: number;
+  baseAmount?: number;
 }
 
 type TableData = Record<string, any>;
@@ -120,6 +122,8 @@ const Requests = () => {
         }
         const total = Math.floor(unitPrice * subjectMultiplier);
         const isFree = total === 0;
+        const paid = typeof item.paidAmount === "number" ? Math.floor(item.paidAmount) : total;
+        const showSavings = paid < total;
 
         // Format period label in French
         const periodLabels: Record<string, string> = {
@@ -144,7 +148,13 @@ const Requests = () => {
           subjects: (isFree || item.studentOffer?.allSubjects)
             ? `Toutes les matières`
             : `${subjectCount} matière${subjectCount > 1 ? 's' : ''}`,
-          totalPrice: isFree ? "Gratuit" : `${total} TND`,
+          totalPrice: isFree
+            ? "Gratuit"
+            : showSavings
+              ? `${paid} TND (au lieu de ${total} TND)`
+              : `${paid} TND`,
+          paidAmount: paid,
+          baseAmount: total,
         };
       });
       setData(formattedData);

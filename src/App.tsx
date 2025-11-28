@@ -12,6 +12,7 @@ import Home from "./pages/home/home";
 import Layout from "./shared/layout/layout";
 import Landing from "./pages/landig-page";
 import Dashboard from "./pages/dashboard/dashboard";
+import ReferralCodePage from "./pages/dashboard/ReferralCodePage";
 import Advertisement from "./pages/dashboard/advertisement/advertisement";
 import Calender from "./pages/dashboard/calender/calender";
 import Chat from "./pages/dashboard/chat/chat";
@@ -91,6 +92,7 @@ function App() {
               } />
               <Route path="stats" element={<Stats />} />
               <Route path="updateprofil" element={<ProfilePage />} />
+              <Route path="referral-code" element={<ReferralCodePage />} />
             </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/register-student" element={<Register />} />
