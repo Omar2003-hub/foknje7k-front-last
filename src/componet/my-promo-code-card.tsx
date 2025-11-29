@@ -65,7 +65,7 @@ const MyPromoCodeCard: React.FC<MyPromoCodeCardProps> = ({
           <div className="flex items-center gap-2 px-3 py-1 bg-yellow-100 rounded-full">
             <FaCoins className="text-yellow-600" />
             <span className="text-sm font-bold text-yellow-700">
-              {userCoins}/{maxCoinsCap} عملة
+              {usageCount}/{maxCoinsCap} عملة
             </span>
           </div>
         )}
@@ -79,7 +79,7 @@ const MyPromoCodeCard: React.FC<MyPromoCodeCardProps> = ({
           </span>
           <button
             onClick={handleCopy}
-            className="p-2 ml-4 text-white transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
+            className="p-2 ml-4 text-primary_bg transition-colors bg-blue-600 rounded-md hover:bg-blue-700"
             title="نسخ إلى الحافظة"
           >
             {copied ? <FaCheck /> : <FaCopy />}
@@ -108,9 +108,9 @@ const MyPromoCodeCard: React.FC<MyPromoCodeCardProps> = ({
               <FaCoins className="text-xl text-yellow-500" />
               <span className="text-sm text-gray-700">عملاتك NJE7EKCOINS</span>
             </div>
-            <span className="text-2xl font-bold text-yellow-600">{userCoins}/{maxCoinsCap}</span>
+            <span className="text-2xl font-bold text-yellow-600">{usageCount}/{maxCoinsCap}</span>
           </div>
-          {userCoins >= maxCoinsCap && (
+          {usageCount >= maxCoinsCap && (
             <p className="mt-2 text-xs text-center text-yellow-700">
               🎉 لقد وصلت إلى الحد الأقصى! يمكنك استخدام عملاتك للحصول على خصم.
             </p>
@@ -125,7 +125,36 @@ const MyPromoCodeCard: React.FC<MyPromoCodeCardProps> = ({
               <FaGift className="text-xl text-green-500" />
               <span className="text-sm text-gray-700">مكافأة الإحالة</span>
             </div>
-            <span className="text-lg font-bold text-green-600">1 نقطة = 5 د.ت</span>
+            <span className="text-lg font-bold text-green-600">
+              {usageCount >= 1 && usageCount <= 20 && 'كل نقطة = 5 د.ت'}
+              {usageCount > 20 && usageCount <= 40 && 'كل نقطة = 7 د.ت'}
+              {usageCount > 40 && 'كل نقطة = 8 د.ت'}
+            </span>
+          </div>
+          {/* Table for teacher reward info */}
+          <div className="mt-4 overflow-x-auto">
+            <table className="min-w-full text-xs text-center border border-green-200 rounded">
+              <thead>
+                <tr className="bg-green-100">
+                  <th className="px-2 py-1 border border-green-200">عدد النقاط</th>
+                  <th className="px-2 py-1 border border-green-200">قيمة كل نقطة</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="px-2 py-1 border border-green-200">1 - 20</td>
+                  <td className="px-2 py-1 border border-green-200">5 د.ت</td>
+                </tr>
+                <tr>
+                  <td className="px-2 py-1 border border-green-200">21 - 40</td>
+                  <td className="px-2 py-1 border border-green-200">7 د.ت</td>
+                </tr>
+                <tr>
+                  <td className="px-2 py-1 border border-green-200">41+</td>
+                  <td className="px-2 py-1 border border-green-200">8 د.ت</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       )}
@@ -134,16 +163,16 @@ const MyPromoCodeCard: React.FC<MyPromoCodeCardProps> = ({
         <p className="text-xs text-center text-gray-600" dir="rtl">
           {isStudent && (
             <>
-              • احصل على <strong>عملة واحدة</strong> عند استخدام شخص لكودك (حد أقصى 50 عملة)<br/>
-              • كل مستخدم يمكنه استخدام كودك <strong>مرة واحدة فقط</strong><br/>
+              • احصل على <strong>عملة واحدة</strong> عند استخدام تلميذ لكودك (حد أقصى 50 عملة)<br/>
+              • كل تلميذ يمكنه استخدام كودك <strong>مرة واحدة فقط</strong><br/>
               • استخدم عملاتك للحصول على خصم على العروض <strong>مرة واحدة في السنة</strong>
             </>
           )}
           {isTeacher && (
             <>
-              • احصل على <strong>نقطة واحدة (5 د.ت)</strong> عند استخدام طالب لكودك<br/>
+              • احصل على <strong>نقطة واحدة (5 د.ت)</strong> عند استخدام تلميذ لكودك<br/>
               • يتم تتبع النقاط شهرياً<br/>
-              • كل مستخدم يمكنه استخدام كودك <strong>مرة واحدة فقط</strong>
+              • كل تلميذ يمكنه استخدام كودك <strong>مرة واحدة فقط</strong>
             </>
           )}
         </p>
