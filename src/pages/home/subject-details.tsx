@@ -181,9 +181,24 @@ const SubjectDetails = () => {
     return url.includes('youtube.com') || url.includes('youtu.be');
   };
 
+  const buildStreamUrl = (url: string) => {
+    if (!url || isYouTubeUrl(url)) return url;
+    try {
+      const parsed = new URL(url, window.location.origin);
+      const pathname = decodeURIComponent(parsed.pathname.replace(/^\/+/, ""));
+      const fileName = pathname || parsed.pathname;
+      const baseApi = "http://localhost:8081";
+      return `${baseApi}/api/v1/local-storage/stream-video?fileName=${encodeURIComponent(fileName)}`;
+    } catch {
+      const sanitized = url.replace(/^\/+/, "");
+      const baseApi = "http://localhost:8081";
+      return `${baseApi}/api/v1/local-storage/stream-video?fileName=${encodeURIComponent(sanitized)}`;
+    }
+  };
+
   useEffect(() => {
     if (videoRef.current && !isYouTubeUrl(videoUrl)) {
-      videoRef.current.src = videoUrl;
+      videoRef.current.src = buildStreamUrl(videoUrl);
       videoRef.current.setAttribute("controlslist", "nodownload");
     }
   }, [videoUrl]);
@@ -638,7 +653,6 @@ const SubjectDetails = () => {
             ) : filteredResources.length > 0 ? (
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredResources
-                  .filter((item) => item.isCompleted === true)
                   .sort((a, b) => a.id - b.id)
                   .map((item) => (
                     <div
