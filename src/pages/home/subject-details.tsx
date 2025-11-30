@@ -29,6 +29,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import "./subject-detail.css";
 import DashboardLayout from "../../shared/layout/DashboardLayout";
+import { BASE_API_URL } from "../../config/api";
 
 interface Video {
   id: number;
@@ -181,27 +182,25 @@ const SubjectDetails = () => {
     return url.includes('youtube.com') || url.includes('youtu.be');
   };
 
-  const buildStreamUrl = (url: string) => {
+  const buildStreamUrl = React.useCallback((url: string) => {
     if (!url || isYouTubeUrl(url)) return url;
     try {
       const parsed = new URL(url, window.location.origin);
       const pathname = decodeURIComponent(parsed.pathname.replace(/^\/+/, ""));
       const fileName = pathname || parsed.pathname;
-      const baseApi = "http://localhost:8081";
-      return `${baseApi}/api/v1/local-storage/stream-video?fileName=${encodeURIComponent(fileName)}`;
+      return `${BASE_API_URL}local-storage/stream-video?fileName=${encodeURIComponent(fileName)}`;
     } catch {
       const sanitized = url.replace(/^\/+/, "");
-      const baseApi = "http://localhost:8081";
-      return `${baseApi}/api/v1/local-storage/stream-video?fileName=${encodeURIComponent(sanitized)}`;
+      return `${BASE_API_URL}local-storage/stream-video?fileName=${encodeURIComponent(sanitized)}`;
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (videoRef.current && !isYouTubeUrl(videoUrl)) {
       videoRef.current.src = buildStreamUrl(videoUrl);
       videoRef.current.setAttribute("controlslist", "nodownload");
     }
-  }, [videoUrl]);
+  }, [videoUrl, buildStreamUrl]);
 
   const handleStatusClick = (statusName: string) => {
     setActiveStatus(statusName);

@@ -3,6 +3,7 @@ import { hideLoader, showLoader } from "../../redux/store/loader-slices";
 import store from "../../redux/store/store";
 import { getSnackbarContext } from "../hooks/use-toast";
 import { logOut } from "../../redux/store/isLogged-slices";
+import { BASE_API_URL } from "../api";
 
 interface CustomHttpRequestConfig extends AxiosRequestConfig {
   withLoader?: boolean;
@@ -23,7 +24,7 @@ class NetworkService {
 
   private constructor() {
     this.axiosInstance = axios.create({
-      baseURL: "https://foknje7ek.com:8081/api/v1/",
+      baseURL: BASE_API_URL,
     });
 
     // Initialize Snackbar Context
@@ -104,15 +105,72 @@ class NetworkService {
             
             case 401:
             case 403:
-              this.showMessage(
-                response.data?.message,
-                "Accès non autorisé.",
-                "error",
-              );
-              window.location.href = "/";
-              localStorage.removeItem("token");
-              store.dispatch(logOut());
+              // Try to collect textual error info from different response shapes
+              const collectedErrors: string[] = [];
+              const pushIfString = (v: any) => {
+                if (!v) return;
+                if (typeof v === "string") collectedErrors.push(v);
+                else if (Array.isArray(v)) collectedErrors.push(...v.filter(Boolean).map(String));
+                else if (typeof v === "object") collectedErrors.push(...Object.values(v).flat().map(String));
+              };
 
+              pushIfString(response.data?.message);
+              pushIfString(response.data?.errors);
+              pushIfString(response.data?.data);
+
+              const combined = collectedErrors.join(" ").toLowerCase();
+
+              const isDisabled =
+                combined.includes("disabled") ||
+                combined.includes("désactiv") ||
+                combined.includes("desactiv");
+
+              if (isDisabled) {
+                // Attempt to determine the user's email from several places before clearing auth
+                const state = store.getState();
+                let userEmail = state.user?.userData?.email;
+
+                // Try response payload
+                if (!userEmail) {
+                  userEmail = response.data?.data?.email;
+                }
+
+                // Try request payload (config.data) if it's JSON containing email
+                if (!userEmail && config?.data) {
+                  try {
+                    const parsed = typeof config.data === "string" ? JSON.parse(config.data) : config.data;
+                    if (parsed?.email) userEmail = parsed.email;
+                  } catch (e) {
+                    // ignore parse errors
+                  }
+                }
+
+                this.showMessage(
+                  "Erreur",
+                  "Veuillez confirmer votre email pour activer votre compte.",
+                  "error",
+                );
+
+                localStorage.removeItem("token");
+                store.dispatch(logOut());
+
+                // Always redirect to confirm-email for disabled accounts
+                // Note: resendConfirmationCode is NOT called here to avoid duplicate calls
+                // The login page or confirm-email page will handle resending
+                const target = userEmail
+                  ? `/confirm-email?email=${encodeURIComponent(userEmail)}`
+                  : "/confirm-email";
+                window.location.href = target;
+              } else {
+                this.showMessage(
+                  response.data?.message || "Erreur",
+                  "Accès non autorisé.",
+                  "error",
+                );
+                window.location.href = "/";
+                localStorage.removeItem("token");
+                store.dispatch(logOut());
+              }
               break;
           }
         } else {
